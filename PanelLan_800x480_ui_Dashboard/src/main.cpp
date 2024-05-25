@@ -23,9 +23,24 @@ int x = 0;
 int y = 0;
 bool last_switch1Status = false;
 char last_SWITCHSTATUS = 0;
+int16_t old_value = 0;
+bool arcAtMax = false;
+bool arc90Max = false;
 
 lv_coord_t init_series_array1[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 lv_coord_t init_series_array2[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+static const uint32_t color_table[20] = 
+{
+	// Green
+	0x00b33b, 0x00cc44, 0x00e64c, 0x00ff55, 0x1aff66,
+	// Yellow
+	0xe5eb05, 0xf4fa0f, 0xf5fb28, 0xf6fb41, 0xf7fc5a,
+	// Orange
+	0xeb7e05, 0xfa8b0f, 0xfb9728, 0xfba341, 0xfcaf5a,
+	// Red
+	0xfc5e5a, 0xfb4641, 0xfb2d28, 0xfa150f, 0xeb0b05
+};
 
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t disp_draw_buf[W * H / 10]; 
@@ -42,8 +57,9 @@ int _val = 0;
 int scReferesh = 0;
 
 char parse(String _inputString);
-void screen_update(void);
+void screen_update(char arcValue);
 // String httpGETRequest(const char* serverName);
+void ledOnColor(int pos);
 
 /* Display flushing */
 void my_disp_flush( lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p )
@@ -102,7 +118,8 @@ void setup(void) {
   data_Chart1_series_array = init_series_array1;
   data_Chart2_series_array = init_series_array2;
   switch1Status = false;
-  char _SWITCHSTATUS = 0;
+  char _SWITCHSTATUS = 0;  
+  char arcInit = 0; 
   
   Serial.begin(115200);
   // reserve 200 bytes for the inputString:
@@ -148,22 +165,6 @@ void setup(void) {
 
 void loop() {   
     unsigned long currentMillis = millis();
-  
-  if(currentMillis - previousMillis >= interval) 
-  {
-     // Check WiFi connection status
-    // if(WiFi.status() == WL_CONNECTED )
-    // { 
-    //   sensorData = httpGETRequest(serverNameTemp);
-    //   Serial.println("Sensor Data: " + sensorData +".");
-    //   // save the last HTTP GET Request
-    //   previousMillis = currentMillis;
-    // }
-    // else 
-    // {
-    //   Serial.println("WiFi Disconnected");
-    // }
-  }
 
   // print the string when a newline arrives:
   if (stringComplete) {
@@ -175,26 +176,37 @@ void loop() {
     _val++;
   } 
 
-  data_Chart2_series_array[0] = 30;
-  data_Chart2_series_array[5] = 50;
-  data_Chart2_series_array[6] = 60;
-  data_Chart2_series_array[7] = (int16_t)_val;
-  data_Chart2_series_array[8] = (int16_t)_val;
-  data_Chart2_series_array[9] = (int16_t)_val;
-  data_Chart2_series_array[10] = 2;
-  
-  data_Chart1_series_array[0] = 15;
-  data_Chart1_series_array[1] = 25;
-  data_Chart1_series_array[2] = (int16_t)_val;
-  data_Chart1_series_array[3] = (int16_t)_val;
-  data_Chart1_series_array[4] = (int16_t)_val;
-  data_Chart1_series_array[5] = 25;
-
   _val++;
   if(_val >= 100) {scReferesh++; _val = 0;}
-  screen_update();
+
   lv_timer_handler();
   lv_tick_inc(1000);
+
+  int16_t new_value = lv_arc_get_value(ui_Arc1);
+
+  arcAtMax = (new_value <= 100 || ((new_value >= 0) && (new_value <=20))) && old_value == 100 ? true : arcAtMax;
+  arcAtMax = (new_value <= 100 && new_value >= 90) && old_value == 100 ? false : arcAtMax;
+
+  if (new_value != old_value && !arcAtMax)
+  {
+    screen_update(new_value);
+    lv_spinbox_set_value(ui_Spinbox1, new_value);
+    ledOnColor((int)new_value);
+    Serial.print("new_value: ");
+    Serial.print(new_value);
+    Serial.print(" ");
+    Serial.print("old_value: ");
+    Serial.print(old_value);
+    Serial.print(" ");
+    Serial.print("arcAtMax: ");
+    Serial.println(arcAtMax);
+    old_value = new_value;
+  }
+  else if (arcAtMax)
+  {
+    screen_update(100);
+    lv_spinbox_set_value(ui_Spinbox1, 100);
+  }
 
   if (_SWITCHSTATUS != last_SWITCHSTATUS)
   {    
@@ -256,9 +268,10 @@ char parse(String _inputString){
   return _val;
 }
 
-void screen_update(void)
+void screen_update(char arcValue)
 {
-  lv_chart_refresh(ui_Chart1);
+  lv_arc_set_value(ui_Arc1, arcValue);
+  //lv_chart_refresh(ui_Chart1);
 }
 
 
@@ -291,3 +304,161 @@ void screen_update(void)
 
 //   return payload;
 // }
+
+void ledOnColor(int pos)
+{
+  char colorPos = 0;
+  switch (pos)
+  {
+    case 0: 
+    case 1: 
+    case 2: 
+    case 3: 
+    case 5:
+          colorPos = 0;
+        break;
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+          colorPos = 1;
+        break;
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+      colorPos = 2;
+      break;
+    case 16:
+    case 17:
+    case 18:
+    case 19:
+    case 20:
+      colorPos = 3;
+      break;
+    case 21:
+    case 22:
+    case 23:
+    case 24:
+    case 25:
+      colorPos = 4;
+      break;
+    case 26:
+    case 27:
+    case 28:
+    case 29:
+    case 30:
+      colorPos = 5;
+      break;
+    case 31:
+    case 32:
+    case 33:
+    case 34:
+    case 35:
+      colorPos = 6;
+      break;
+    case 36:
+    case 37:
+    case 38:
+    case 39:
+    case 40:
+      colorPos = 7;
+      break;
+    case 41:
+    case 42:
+    case 43:
+    case 44:
+    case 45:
+      colorPos = 8;
+      break;
+    case 46:
+    case 47:
+    case 48:
+    case 49:
+    case 50:
+      colorPos = 9;
+      break;
+    case 51:
+    case 52:
+    case 53:
+    case 54:
+    case 55:
+      colorPos = 10;
+      break;
+    case 56:
+    case 57:
+    case 58:
+    case 59:
+    case 60:
+      colorPos = 11;
+      break;
+    case 61:
+    case 62:
+    case 63:
+    case 64:
+    case 65:
+      colorPos = 12;
+      break;
+    case 66:
+    case 67:
+    case 68:
+    case 69:
+    case 70:
+      colorPos = 13;
+      break;
+    case 71:
+    case 72:
+    case 73:
+    case 74:
+    case 75:
+      colorPos = 14;
+      break;
+    case 76:
+    case 77:
+    case 78:
+    case 79:
+    case 80:
+      colorPos = 15;
+      break;
+    case 81:
+    case 82:
+    case 83:
+    case 84:
+    case 85:
+      colorPos = 16;
+      break;
+    case 86:
+    case 87:
+    case 88:
+    case 89:
+    case 90:
+      colorPos = 17;
+      break;
+    case 91:
+    case 92:
+    case 93:
+    case 94:
+    case 95:
+      colorPos = 18;
+      break;
+    case 96:
+    case 97:
+    case 98:
+    case 99:
+    case 100:
+      colorPos = 19;
+      break;  
+    default:
+      break;
+  }
+
+  uint32_t color = color_table[colorPos];
+  printf("pos: %d",pos);
+  printf("  ");
+  printf("colorPos: %d",colorPos);
+  printf("  ");
+  printf("color: %d\n",color);
+  lv_obj_set_style_bg_color(ui_Panel3, lv_color_hex(color), LV_PART_MAIN | LV_STATE_DEFAULT);
+}
