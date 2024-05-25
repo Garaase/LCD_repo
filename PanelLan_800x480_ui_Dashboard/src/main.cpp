@@ -25,7 +25,7 @@ bool last_switch1Status = false;
 char last_SWITCHSTATUS = 0;
 int16_t old_value = 0;
 bool arcAtMax = false;
-bool arc90Max = false;
+bool arcAtMin = false;
 
 lv_coord_t init_series_array1[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 lv_coord_t init_series_array2[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -184,9 +184,9 @@ void loop() {
 
   int16_t new_value = lv_arc_get_value(ui_Arc1);
 
-  arcAtMax = (new_value <= 100 || ((new_value >= 0) && (new_value <=20))) && old_value == 100 ? true : arcAtMax;
-  arcAtMax = (new_value <= 100 && new_value >= 90) && old_value == 100 ? false : arcAtMax;
-
+  arcAtMax = (new_value <= 90 || ((new_value >= 0) && (new_value <=20))) && old_value == 90 ? true : arcAtMax;
+  arcAtMax = (new_value < 90 && new_value >= 80) && old_value == 90 ? false : arcAtMax;
+  
   if (new_value != old_value && !arcAtMax)
   {
     screen_update(new_value);
@@ -204,8 +204,8 @@ void loop() {
   }
   else if (arcAtMax)
   {
-    screen_update(100);
-    lv_spinbox_set_value(ui_Spinbox1, 100);
+    screen_update(90);
+    lv_spinbox_set_value(ui_Spinbox1, 90);
   }
 
   if (_SWITCHSTATUS != last_SWITCHSTATUS)
