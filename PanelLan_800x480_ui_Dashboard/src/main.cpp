@@ -30,16 +30,32 @@ bool arcAtMin = false;
 lv_coord_t init_series_array1[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 lv_coord_t init_series_array2[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-static const uint32_t color_table[20] = 
+static const uint32_t color_table[100] = 
 {
-	// Green
-	0x00b33b, 0x00cc44, 0x00e64c, 0x00ff55, 0x1aff66,
-	// Yellow
-	0xe5eb05, 0xf4fa0f, 0xf5fb28, 0xf6fb41, 0xf7fc5a,
-	// Orange
-	0xeb7e05, 0xfa8b0f, 0xfb9728, 0xfba341, 0xfcaf5a,
-	// Red
-	0xfc5e5a, 0xfb4641, 0xfb2d28, 0xfa150f, 0xeb0b05
+  // Green
+  0x00b33b,	0x00b345,	0x00b34f,	0x00b359,	0x00b363,
+  0x00cc44,	0x00cc4e,	0x00cc58,	0x00cc62,	0x00cc6c,
+  0x00e64c,	0x00e656,	0x00e660,	0x00e66a,	0x00e674,
+  0x00ff55,	0x00ff5f,	0x00ff69,	0x00ff73,	0x00ff7d,
+  0x1aff66,	0x1aff70,	0x1aff7a,	0x1aff84,	0x1aff8e,
+  // Yellow
+  0xe5eb05,	0xe5eb0f,	0xe5eb19,	0xe5eb23,	0xe5eb2d,
+  0xf4fa0f,	0xf4fa19,	0xf4fa23,	0xf4fa2d,	0xf4fa37,
+  0xf5fb28,	0xf5fb32,	0xf5fb3c,	0xf5fb46,	0xf5fb50,
+  0xf6fb41,	0xf6fb4b,	0xf6fb55,	0xf6fb5f,	0xf6fb69,
+  0xf7fc5a,	0xf7fc64,	0xf7fc6e,	0xf7fc78,	0xf7fc82,
+  // Orange
+  0xeb7e05,	0xeb7e0f,	0xeb7e19,	0xeb7e23,	0xeb7e2d,
+  0xfa8b0f,	0xfa8b19,	0xfa8b23,	0xfa8b2d,	0xfa8b37,
+  0xfb9728,	0xfb9732,	0xfb973c,	0xfb9746,	0xfb9750,
+  0xfba341,	0xfba34b,	0xfba355,	0xfba35f,	0xfba369,
+  0xfcaf5a,	0xfcaf64,	0xfcaf6e,	0xfcaf78,	0xfcaf82,
+  // Red 
+  0xfc5e5a,	0xfc5e64,	0xfc5e6e,	0xfc5e78,	0xfc5e82,
+  0xfb4641,	0xfb464b,	0xfb4655,	0xfb465f,	0xfb4669,
+  0xfb2d28,	0xfb2d32,	0xfb2d3c,	0xfb2d46,	0xfb2d50,
+  0xfa150f,	0xfa1519,	0xfa1523,	0xfa152d,	0xfa1537,
+  0xeb0b05,	0xeb0b0f,	0xeb0b19,	0xeb0b23,	0xeb0b2d
 };
 
 static lv_disp_draw_buf_t draw_buf;
@@ -308,157 +324,6 @@ void screen_update(char arcValue)
 void ledOnColor(int pos)
 {
   char colorPos = 0;
-  switch (pos)
-  {
-    case 0: 
-    case 1: 
-    case 2: 
-    case 3: 
-    case 5:
-          colorPos = 0;
-        break;
-    case 6:
-    case 7:
-    case 8:
-    case 9:
-    case 10:
-          colorPos = 1;
-        break;
-    case 11:
-    case 12:
-    case 13:
-    case 14:
-    case 15:
-      colorPos = 2;
-      break;
-    case 16:
-    case 17:
-    case 18:
-    case 19:
-    case 20:
-      colorPos = 3;
-      break;
-    case 21:
-    case 22:
-    case 23:
-    case 24:
-    case 25:
-      colorPos = 4;
-      break;
-    case 26:
-    case 27:
-    case 28:
-    case 29:
-    case 30:
-      colorPos = 5;
-      break;
-    case 31:
-    case 32:
-    case 33:
-    case 34:
-    case 35:
-      colorPos = 6;
-      break;
-    case 36:
-    case 37:
-    case 38:
-    case 39:
-    case 40:
-      colorPos = 7;
-      break;
-    case 41:
-    case 42:
-    case 43:
-    case 44:
-    case 45:
-      colorPos = 8;
-      break;
-    case 46:
-    case 47:
-    case 48:
-    case 49:
-    case 50:
-      colorPos = 9;
-      break;
-    case 51:
-    case 52:
-    case 53:
-    case 54:
-    case 55:
-      colorPos = 10;
-      break;
-    case 56:
-    case 57:
-    case 58:
-    case 59:
-    case 60:
-      colorPos = 11;
-      break;
-    case 61:
-    case 62:
-    case 63:
-    case 64:
-    case 65:
-      colorPos = 12;
-      break;
-    case 66:
-    case 67:
-    case 68:
-    case 69:
-    case 70:
-      colorPos = 13;
-      break;
-    case 71:
-    case 72:
-    case 73:
-    case 74:
-    case 75:
-      colorPos = 14;
-      break;
-    case 76:
-    case 77:
-    case 78:
-    case 79:
-    case 80:
-      colorPos = 15;
-      break;
-    case 81:
-    case 82:
-    case 83:
-    case 84:
-    case 85:
-      colorPos = 16;
-      break;
-    case 86:
-    case 87:
-    case 88:
-    case 89:
-    case 90:
-      colorPos = 17;
-      break;
-    case 91:
-    case 92:
-    case 93:
-    case 94:
-    case 95:
-      colorPos = 18;
-      break;
-    case 96:
-    case 97:
-    case 98:
-    case 99:
-    case 100:
-      colorPos = 19;
-      break;  
-    default:
-      break;
-  }
-
-  uint32_t color = color_table[colorPos];
-  printf("pos: %d",pos);
-  printf("  ");
-  printf("colorPos: %d",colorPos);
-  printf("  ");
-  printf("color: %d\n",color);
+  uint32_t color = color_table[pos];
   lv_obj_set_style_bg_color(ui_Panel3, lv_color_hex(color), LV_PART_MAIN | LV_STATE_DEFAULT);
 }
