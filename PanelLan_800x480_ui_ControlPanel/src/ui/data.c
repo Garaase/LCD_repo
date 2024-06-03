@@ -2,6 +2,12 @@
 #include "lvgl.h"
 //lv_coord_t * data_Chart1_series_array;
 //lv_coord_t * data_Chart2_series_array;
+bool BtnRelay1Toggle = false;
+bool BtnRelay2Toggle = false;
+bool BtnRelay3Toggle = false;
+bool BtnRelay4Toggle = false;
+bool BtnRelaysToggled = false;
+char selectWifiNode;
 bool switch1Status;
 char _SWITCHSTATUS;
 

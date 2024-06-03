@@ -97,6 +97,6 @@ void ui_ScreenSwitchBoard_screen_init(void)
     lv_obj_add_event_cb(ui_Switch2, ui_event_Switch2, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_Switch3, ui_event_Switch3, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_Switch4, ui_event_Switch4, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_ScreenSwitchBoard, ui_event_ScreenSwitchBoard, LV_EVENT_ALL, NULL);
+ //   lv_obj_add_event_cb(ui_ScreenSwitchBoard, ui_event_ScreenSwitchBoard, LV_EVENT_ALL, NULL);
 
 }

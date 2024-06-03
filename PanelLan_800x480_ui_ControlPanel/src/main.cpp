@@ -8,9 +8,8 @@
 #include <AsyncElegantOTA.h>
 #include "setupWifi.h"
 
-// const char* ssid = "ESP32-Access-Point";
-// const char* password = "123456789";
-//Your IP address or domain name with URL path
+#include <stdlib.h>
+
 const char* serverNameTemp = "http://192.168.4.2/sensorData";
 const char* serverNameOnLed1 = "http://192.168.4.2/onLed1";
 const char* serverNameOffLed1 = "http://192.168.4.2/offLed1";
@@ -33,8 +32,7 @@ String sensorData;
 unsigned long previousMillis = 0;
 const long interval = 5000; 
 
-#define USE_UI    //if you want to use the ui export from Squareline, please do not annotate this line.
-#define W   800
+#define W  800
 #define H  480
 
 int x = 0;
@@ -64,7 +62,21 @@ char changeNode = '0';
 char parse(String _inputString);
 void screen_update(void);
 String httpGETRequest(const char* serverName);
+void changeWifiNode(char _selectWifiNode, char _changeNode);
+void switchBoard(char __Switchstatus, char _last_Switchstatus);
+void  setup_WifiNode(void);
+
 AsyncWebServer client(80);
+
+struct wifiActSensNode {
+  char node; 
+  const char* ssid[3];
+  IPAddress gateway[3];
+  char sw[3][4]; 
+};
+
+// Create three wifiActSensNodes
+struct wifiActSensNode *wifiNode = NULL;
 
 String checkTemp() {
   return String("Hello from client");
@@ -127,6 +139,9 @@ void setup(void) {
   switch1Status = false;
   char _SWITCHSTATUS = 0;
   
+  wifiNode = (struct wifiActSensNode*)malloc(sizeof(struct wifiActSensNode));
+  setup_WifiNode();
+
   Serial.begin(115200);
   // reserve 200 bytes for the inputString:
   inputString.reserve(1);
@@ -164,117 +179,32 @@ void setup(void) {
     client.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/plain", "Message from ESP32 LCD");
   });  
+
+  setupWifi(_ssid1, _gateway1);
+  getWifi();
 }
 
 void loop() { 
+  lv_timer_handler();
+  lv_tick_inc(1000);
   if (stringComplete) {
     Serial.println(inputString);
     selectNode = inputString[0];
-    // clear the string:
     inputString = "";
     stringComplete = false;
   }
-
-  if (selectNode == '1' && changeNode != selectNode)
-  {      
-    setupWifi(_ssid1, _gateway1);
-    getWifi();
-    changeNode = selectNode;
-  }
-  else if (selectNode == '2' && changeNode != selectNode)
-  {      
-    setupWifi(_ssid2, _gateway2);
-    getWifi();
-    changeNode = selectNode;
-  } 
-  else if (selectNode == '3' && changeNode != selectNode)
-  {      
-    setupWifi(_ssid3, _gateway3);
-    getWifi();
-    changeNode = selectNode;
-  } 
-  
-  if (selectNode == '1' || selectNode == '2' || selectNode == '3')
+  // Change Wifi Node
+  if (selectWifiNode != changeNode)
   {
-    unsigned long currentMillis = millis();
-
-    if(currentMillis - previousMillis >= interval) 
-    {
-      // Check WiFi connection status
-      if(WiFi.status() == WL_CONNECTED )
-      { 
-        Serial.print("Gateway IP: ");
-        Serial.print(WiFi.gatewayIP());
-        Serial.print(" & local IP: ");
-        Serial.println(WiFi.localIP());
-        sensorData = httpGETRequest(serverNameTemp);
-        Serial.println("Sensor Data: " + sensorData +".");
-        // save the last HTTP GET Request
-        previousMillis = currentMillis;
-      }
-      else 
-      {
-        Serial.println("WiFi Disconnected");
-      }
-    }
-
-    _val++;
-    if(_val >= 100) {scReferesh++; _val = 0;}
-    screen_update();
-    lv_timer_handler();
-    lv_tick_inc(1000);
-
-    if (_SWITCHSTATUS != last_SWITCHSTATUS)
-    {    
-      switch (_SWITCHSTATUS)
-      {
-        case 11:
-          Serial.println("Switch1 is ON");
-          sensorData = httpGETRequest(serverNameOnLed1);
-          Serial.println("Sensor Data (lamp 1 on): " + sensorData +".");
-          break;
-        case 10:
-          Serial.println("Switch1 is OFF");
-          sensorData = httpGETRequest(serverNameOffLed1);
-          Serial.println("Sensor Data (lamp 1 off): " + sensorData +".");
-          break;  
-        case 22:
-          Serial.println("Switch2 is ON");
-          sensorData = httpGETRequest(serverNameOnLed2);
-          Serial.println("Sensor Data (lamp 2 on): " + sensorData +".");
-          break;
-        case 20:
-          Serial.println("Switch2 is OFF");
-          sensorData = httpGETRequest(serverNameOffLed2);
-          Serial.println("Sensor Data (lamp 2 off): " + sensorData +".");
-          break;  
-        case 33:
-          Serial.println("Switch3 is ON");
-          sensorData = httpGETRequest(serverNameOnLed3);
-          Serial.println("Sensor Data (lamp 3 on): " + sensorData +".");
-          break;
-        case 30:
-          Serial.println("Switch3 is OFF");
-          sensorData = httpGETRequest(serverNameOffLed3);
-          Serial.println("Sensor Data (lamp 3 off): " + sensorData +".");
-          break;  
-        case 44:
-          Serial.println("Switch4 is ON");
-          sensorData = httpGETRequest(serverNameOnLed4);
-          Serial.println("Sensor Data (lamp 4 on): " + sensorData +".");
-          break;
-        case 40:
-          Serial.println("Switch4 is OFF");
-          sensorData = httpGETRequest(serverNameOffLed4);
-          Serial.println("Sensor Data (lamp 4 off): " + sensorData +".");
-          break;  
-        default:
-          Serial.println("All Switchs are OFF");
-          break;
-      }
-      last_SWITCHSTATUS = _SWITCHSTATUS;
-    }
+    changeWifiNode(selectWifiNode, changeNode);
+    changeNode = selectWifiNode;
   }  
+  // Check clicked button and send connected event
+  if (_SWITCHSTATUS != last_SWITCHSTATUS)
+  { 
+    switchBoard(_SWITCHSTATUS, last_SWITCHSTATUS); 
+    last_SWITCHSTATUS = _SWITCHSTATUS;
+  }
 }
 
 /*
@@ -282,7 +212,6 @@ void loop() {
   routine is run between each time loop() runs, so using delay inside loop can
   delay response. Multiple bytes of data may be available.
 */
-
 char parse(String _inputString){
   char _val = _inputString.toInt();
   return _val;
@@ -290,7 +219,7 @@ char parse(String _inputString){
 
 void screen_update(void)
 {
-  lv_chart_refresh(ui_Chart1);
+  //lv_chart_refresh(ui_Chart1);
 }
 
 /*************************************************************
@@ -339,4 +268,139 @@ void serialEvent() {
       stringComplete = true;
     }
   }
+}
+
+void changeWifiNode(char _selectWifiNode, char _changeNode)
+{
+  if (_selectWifiNode == '1' && _changeNode != _selectWifiNode)
+  {      
+    setupWifi(_ssid1, _gateway1);
+    getWifi();
+    _changeNode = _selectWifiNode;
+  }
+  else if (_selectWifiNode == '2' && _changeNode != _selectWifiNode)
+  {      
+    setupWifi(_ssid2, _gateway2);
+    getWifi();
+    _changeNode = _selectWifiNode;
+  } 
+  else if (_selectWifiNode == '3' && _changeNode != _selectWifiNode)
+  {      
+    setupWifi(_ssid3, _gateway3);
+    getWifi();
+    _changeNode = _selectWifiNode;
+  } 
+  
+  if (_selectWifiNode == '1' || _selectWifiNode == '2' || _selectWifiNode == '3')
+  {
+    unsigned long currentMillis = millis();
+
+    if(currentMillis - previousMillis >= interval) 
+    {
+      // Check WiFi connection status
+      if(WiFi.status() == WL_CONNECTED )
+      { 
+        Serial.print("Gateway IP: ");
+        Serial.print(WiFi.gatewayIP());
+        Serial.print(" & local IP: ");
+        Serial.println(WiFi.localIP());
+        sensorData = httpGETRequest(serverNameTemp);
+        Serial.println("Sensor Data: " + sensorData +".");
+        // save the last HTTP GET Request
+        previousMillis = currentMillis;
+      }
+      else 
+      {
+        Serial.println("WiFi Disconnected");
+      }
+    }
+  }
+}
+
+void switchBoard(char __Switchstatus, char _last_Switchstatus)
+{ 
+  if (_SWITCHSTATUS != _last_Switchstatus)
+    {    
+      switch (_SWITCHSTATUS)
+      {
+        case 11:
+          Serial.println("Switch1 is ON");
+          sensorData = httpGETRequest(serverNameOnLed1);
+          Serial.println("Sensor Data (lamp 1 on): " + sensorData +".");
+          break;
+        case 10:
+          Serial.println("Switch1 is OFF");
+          sensorData = httpGETRequest(serverNameOffLed1);
+          Serial.println("Sensor Data (lamp 1 off): " + sensorData +".");
+          break;  
+        case 22:
+          Serial.println("Switch2 is ON");
+          sensorData = httpGETRequest(serverNameOnLed2);
+          Serial.println("Sensor Data (lamp 2 on): " + sensorData +".");
+          break;
+        case 20:
+          Serial.println("Switch2 is OFF");
+          sensorData = httpGETRequest(serverNameOffLed2);
+          Serial.println("Sensor Data (lamp 2 off): " + sensorData +".");
+          break;  
+        case 33:
+          Serial.println("Switch3 is ON");
+          sensorData = httpGETRequest(serverNameOnLed3);
+          Serial.println("Sensor Data (lamp 3 on): " + sensorData +".");
+          break;
+        case 30:
+          Serial.println("Switch3 is OFF");
+          sensorData = httpGETRequest(serverNameOffLed3);
+          Serial.println("Sensor Data (lamp 3 off): " + sensorData +".");
+          break;  
+        case 44:
+          Serial.println("Switch4 is ON");
+          sensorData = httpGETRequest(serverNameOnLed4);
+          Serial.println("Sensor Data (lamp 4 on): " + sensorData +".");
+          break;
+        case 40:
+          Serial.println("Switch4 is OFF");
+          sensorData = httpGETRequest(serverNameOffLed4);
+          Serial.println("Sensor Data (lamp 4 off): " + sensorData +".");
+          break;  
+        default:
+          Serial.println("All Switchs are OFF");
+          break;
+      }
+    }
+}
+
+void  setup_WifiNode(void)
+{
+  char i = wifiNode->node = 0;
+  wifiNode->ssid[i] = _ssid1;
+  wifiNode->gateway[i] = _gateway1;
+  wifiNode->sw[i][0]= 10;
+  wifiNode->sw[i][1]= 20;
+  wifiNode->sw[i][2]= 30;
+  wifiNode->sw[i][3]= 40;
+  
+  i = wifiNode->node = 1;
+  wifiNode->ssid[i] = _ssid1;
+  wifiNode->gateway[i] = _gateway1;
+  wifiNode->sw[i][0]= 10;
+  wifiNode->sw[i][1]= 20;
+  wifiNode->sw[i][2]= 30;
+  wifiNode->sw[i][3]= 40;
+
+  
+  i = wifiNode->node = 2;
+  wifiNode->ssid[i] = _ssid1;
+  wifiNode->gateway[i] = _gateway1;
+  wifiNode->sw[i][0]= 10;
+  wifiNode->sw[i][1]= 20;
+  wifiNode->sw[i][2]= 30;
+  wifiNode->sw[i][3]= 40;
+
+  Serial.print("Node ssid: ");
+  Serial.print(wifiNode->ssid[0]);
+  Serial.print(" gw: ");
+  Serial.print(wifiNode->gateway[0].toString());
+  Serial.print(" sw: ");
+  Serial.println(wifiNode->sw[0][0]);
 }
