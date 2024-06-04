@@ -7,7 +7,7 @@ bool BtnRelay2Toggle = false;
 bool BtnRelay3Toggle = false;
 bool BtnRelay4Toggle = false;
 bool BtnRelaysToggled = false;
-char selectWifiNode;
+char selectWifiNode = 1;
 bool switch1Status;
 char _SWITCHSTATUS;
 

@@ -60,7 +60,7 @@ char selectNode = '0';
 char changeNode = '0';
 
 char parse(String _inputString);
-void screen_update(void);
+void screen_update(char n);
 String httpGETRequest(const char* serverName);
 void changeWifiNode(char _selectWifiNode, char _changeNode);
 void switchBoard(char __Switchstatus, char _last_Switchstatus);
@@ -68,15 +68,16 @@ void  setup_WifiNode(void);
 
 AsyncWebServer client(80);
 
-struct wifiActSensNode {
+struct wifiActSensNode 
+{
   char node; 
-  const char* ssid[3];
-  IPAddress gateway[3];
-  char sw[3][4]; 
+  const char* ssid;
+  IPAddress gateway;
+  char sw[4]; 
 };
 
 // Create three wifiActSensNodes
-struct wifiActSensNode *wifiNode = NULL;
+struct wifiActSensNode *wifiNode[3] = {NULL, NULL, NULL};
 
 String checkTemp() {
   return String("Hello from client");
@@ -139,8 +140,10 @@ void setup(void) {
   switch1Status = false;
   char _SWITCHSTATUS = 0;
   
-  wifiNode = (struct wifiActSensNode*)malloc(sizeof(struct wifiActSensNode));
-  setup_WifiNode();
+  wifiNode[0] = (struct wifiActSensNode*)malloc(sizeof(struct wifiActSensNode));
+  wifiNode[1] = (struct wifiActSensNode*)malloc(sizeof(struct wifiActSensNode));
+  wifiNode[2] = (struct wifiActSensNode*)malloc(sizeof(struct wifiActSensNode));
+  wifiNode[3] = (struct wifiActSensNode*)malloc(sizeof(struct wifiActSensNode));
 
   Serial.begin(115200);
   // reserve 200 bytes for the inputString:
@@ -182,6 +185,8 @@ void setup(void) {
 
   setupWifi(_ssid1, _gateway1);
   getWifi();
+  
+  setup_WifiNode();
 }
 
 void loop() { 
@@ -195,16 +200,65 @@ void loop() {
   }
   // Change Wifi Node
   if (selectWifiNode != changeNode)
-  {
+  {    
     changeWifiNode(selectWifiNode, changeNode);
+    Serial.print("wifiNode[selectWifiNode-1]: ");
+    Serial.println(wifiNode[selectWifiNode-1]->node);
+    screen_update(selectWifiNode);
     changeNode = selectWifiNode;
+    Serial.print("SelectWifiNode: ");
+    Serial.println(selectWifiNode);
   }  
   // Check clicked button and send connected event
   if (_SWITCHSTATUS != last_SWITCHSTATUS)
   { 
     switchBoard(_SWITCHSTATUS, last_SWITCHSTATUS); 
     last_SWITCHSTATUS = _SWITCHSTATUS;
+    Serial.print("selectWifiNode-1: ");
+    Serial.println(selectWifiNode-1, DEC);
+    Serial.print("_SWITCHSTATUS/10-1: ");
+    Serial.print((_SWITCHSTATUS/10)-1, DEC);
+    Serial.print(" ");
+    Serial.println((_SWITCHSTATUS), DEC);
+    wifiNode[selectWifiNode-1]->sw[((_SWITCHSTATUS/10))-1] = _SWITCHSTATUS;
+    
+    Serial.print("NODE1 SWITCHSTATUS: ");
+    Serial.print(wifiNode[0]->sw[0], DEC);
+    Serial.print(" ");
+    Serial.print(wifiNode[0]->sw[1], DEC);
+    Serial.print(" ");
+    Serial.print(wifiNode[0]->sw[2], DEC);
+    Serial.print(" ");
+    Serial.println(wifiNode[0]->sw[3], DEC);
+    Serial.print("NODE2 SWITCHSTATUS: ");
+    Serial.print(wifiNode[1]->sw[0], DEC);
+    Serial.print(" ");
+    Serial.print(wifiNode[1]->sw[1], DEC);
+    Serial.print(" ");
+    Serial.print(wifiNode[1]->sw[2], DEC);
+    Serial.print(" ");
+    Serial.println(wifiNode[1]->sw[3], DEC);
+    Serial.print("NODE3 SWITCHSTATUS: ");
+    Serial.print(wifiNode[2]->sw[0], DEC);
+    Serial.print(" ");
+    Serial.print(wifiNode[2]->sw[1], DEC);
+    Serial.print(" ");
+    Serial.print(wifiNode[2]->sw[2], DEC);
+    Serial.print(" ");
+    Serial.println(wifiNode[2]->sw[3], DEC);
   }
+  
+  if (WiFi.isConnected())
+  {
+    lv_label_set_text(ui_LabelStatus, "Wifi is connected!");
+    lv_obj_set_style_text_color(ui_LabelStatus, lv_color_hex(0x38403),  0);
+  }
+  else
+  {
+    lv_label_set_text(ui_LabelStatus, "Wifi is disconnected!");  
+    lv_obj_set_style_text_color(ui_LabelStatus, lv_color_hex(0xC40303), 0);  
+  }
+  
 }
 
 /*
@@ -217,9 +271,30 @@ char parse(String _inputString){
   return _val;
 }
 
-void screen_update(void)
+void screen_update(char n)
 {
-  //lv_chart_refresh(ui_Chart1);
+  n = n-1;
+  const char * relayStatus[4] ={ "OFF", "OFF", "OFF", "OFF"};
+  int32_t relayLbtColor[4] = {(int)12845827, (int)12845827, (int)12845827, (int)12845827};
+
+  relayStatus[0] = wifiNode[n]->sw[0] == 11 ? "ON" : "OFF";
+  relayStatus[1] = wifiNode[n]->sw[1] == 22 ? "ON" : "OFF";
+  relayStatus[2] = wifiNode[n]->sw[2] == 33 ? "ON" : "OFF";
+  relayStatus[3] = wifiNode[n]->sw[3] == 44 ? "ON" : "OFF";
+
+  relayLbtColor[0] = wifiNode[n]->sw[0] == 11 ? (int)230403 : (int)12845827;
+  relayLbtColor[1] = wifiNode[n]->sw[1] == 22 ? (int)230403 : (int)12845827;
+  relayLbtColor[2] = wifiNode[n]->sw[2] == 33 ? (int)230403 : (int)12845827;
+  relayLbtColor[3] = wifiNode[n]->sw[3] == 44 ? (int)230403 : (int)12845827;
+  
+  _ui_label_set_property(ui_LabelBtnRelay1, _UI_LABEL_PROPERTY_TEXT, relayStatus[0]);
+  lv_obj_set_style_text_color(ui_LabelBtnRelay1, lv_color_hex(relayLbtColor[0]), LV_PART_MAIN | LV_STATE_DEFAULT);
+  _ui_label_set_property(ui_LabelBtnRelay2, _UI_LABEL_PROPERTY_TEXT, relayStatus[1]);
+  lv_obj_set_style_text_color(ui_LabelBtnRelay2, lv_color_hex(relayLbtColor[1]), LV_PART_MAIN | LV_STATE_DEFAULT);
+  _ui_label_set_property(ui_LabelBtnRelay3, _UI_LABEL_PROPERTY_TEXT, relayStatus[2]);
+  lv_obj_set_style_text_color(ui_LabelBtnRelay3, lv_color_hex(relayLbtColor[2]), LV_PART_MAIN | LV_STATE_DEFAULT);
+  _ui_label_set_property(ui_LabelBtnRelay4, _UI_LABEL_PROPERTY_TEXT, relayStatus[3]);
+  lv_obj_set_style_text_color(ui_LabelBtnRelay4, lv_color_hex(relayLbtColor[3]), LV_PART_MAIN | LV_STATE_DEFAULT);
 }
 
 /*************************************************************
@@ -272,26 +347,26 @@ void serialEvent() {
 
 void changeWifiNode(char _selectWifiNode, char _changeNode)
 {
-  if (_selectWifiNode == '1' && _changeNode != _selectWifiNode)
+  if (_selectWifiNode == 1 && _changeNode != _selectWifiNode)
   {      
     setupWifi(_ssid1, _gateway1);
     getWifi();
     _changeNode = _selectWifiNode;
   }
-  else if (_selectWifiNode == '2' && _changeNode != _selectWifiNode)
+  else if (_selectWifiNode == 2 && _changeNode != _selectWifiNode)
   {      
     setupWifi(_ssid2, _gateway2);
     getWifi();
     _changeNode = _selectWifiNode;
   } 
-  else if (_selectWifiNode == '3' && _changeNode != _selectWifiNode)
+  else if (_selectWifiNode == 3 && _changeNode != _selectWifiNode)
   {      
     setupWifi(_ssid3, _gateway3);
     getWifi();
     _changeNode = _selectWifiNode;
   } 
   
-  if (_selectWifiNode == '1' || _selectWifiNode == '2' || _selectWifiNode == '3')
+  if (_selectWifiNode == 1 || _selectWifiNode == 2 || _selectWifiNode == 3)
   {
     unsigned long currentMillis = millis();
 
@@ -372,35 +447,27 @@ void switchBoard(char __Switchstatus, char _last_Switchstatus)
 
 void  setup_WifiNode(void)
 {
-  char i = wifiNode->node = 0;
-  wifiNode->ssid[i] = _ssid1;
-  wifiNode->gateway[i] = _gateway1;
-  wifiNode->sw[i][0]= 10;
-  wifiNode->sw[i][1]= 20;
-  wifiNode->sw[i][2]= 30;
-  wifiNode->sw[i][3]= 40;
+  char i = (wifiNode[0]->node= 1)-1;
+  wifiNode[0]->ssid = _ssid1;
+  wifiNode[0]->gateway[i] = _gateway1;
+  wifiNode[0]->sw[0]= 10;
+  wifiNode[0]->sw[1]= 20;
+  wifiNode[0]->sw[2]= 30;
+  wifiNode[0]->sw[3]= 40;
   
-  i = wifiNode->node = 1;
-  wifiNode->ssid[i] = _ssid1;
-  wifiNode->gateway[i] = _gateway1;
-  wifiNode->sw[i][0]= 10;
-  wifiNode->sw[i][1]= 20;
-  wifiNode->sw[i][2]= 30;
-  wifiNode->sw[i][3]= 40;
-
+  i = (wifiNode[1]->node = 2)-1;
+  wifiNode[1]->ssid = _ssid2;
+  wifiNode[1]->gateway[i] = _gateway2;
+  wifiNode[1]->sw[0]= 10;
+  wifiNode[1]->sw[1]= 20;
+  wifiNode[1]->sw[2]= 30;
+  wifiNode[1]->sw[3]= 40;
   
-  i = wifiNode->node = 2;
-  wifiNode->ssid[i] = _ssid1;
-  wifiNode->gateway[i] = _gateway1;
-  wifiNode->sw[i][0]= 10;
-  wifiNode->sw[i][1]= 20;
-  wifiNode->sw[i][2]= 30;
-  wifiNode->sw[i][3]= 40;
-
-  Serial.print("Node ssid: ");
-  Serial.print(wifiNode->ssid[0]);
-  Serial.print(" gw: ");
-  Serial.print(wifiNode->gateway[0].toString());
-  Serial.print(" sw: ");
-  Serial.println(wifiNode->sw[0][0]);
+  i = (wifiNode[2]->node = 3)-1;
+  wifiNode[2]->ssid = _ssid3;
+  wifiNode[2]->gateway[i] = _gateway3;
+  wifiNode[2]->sw[0]= 10;
+  wifiNode[2]->sw[1]= 20;
+  wifiNode[2]->sw[2]= 30;
+  wifiNode[2]->sw[3]= 40;
 }

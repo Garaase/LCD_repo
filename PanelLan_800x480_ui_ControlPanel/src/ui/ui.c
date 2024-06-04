@@ -112,22 +112,22 @@ void ui_event_SliderWifiNode(lv_event_t * e)
         if (SliderWifiNode1Level > 69 && SliderWifiNode1Level <= 100)
         {
             lv_slider_set_value(ui_SliderWifiNode, 95, LV_ANIM_OFF);
-            selectWifiNode = '1';
+            selectWifiNode = 1;
         }
         else if (SliderWifiNode1Level > 30 && SliderWifiNode1Level <= 69)
         {
             lv_slider_set_value(ui_SliderWifiNode, 50, LV_ANIM_OFF);
-            selectWifiNode = '2';
+            selectWifiNode = 2;
         }
         else if (SliderWifiNode1Level >= 0 && SliderWifiNode1Level <= 30)
         {
             lv_slider_set_value(ui_SliderWifiNode, 0, LV_ANIM_OFF);
-            selectWifiNode = '3';
+            selectWifiNode = 3;
         }
         else 
         {
             lv_slider_set_value(ui_SliderWifiNode, 95, LV_ANIM_OFF);
-            selectWifiNode = '1';
+            selectWifiNode = 1;
         }
         
     }
