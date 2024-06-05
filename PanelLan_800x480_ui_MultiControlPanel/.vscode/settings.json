@@ -14,7 +14,6 @@
         "lv_bidi.h": "c",
         "lv_txt.h": "c",
         "lv_obj_draw.h": "c",
-        "lv_obj_style.h": "c",
-        "ui_helpers.h": "c"
+        "lv_obj_style.h": "c"
     }
 }
