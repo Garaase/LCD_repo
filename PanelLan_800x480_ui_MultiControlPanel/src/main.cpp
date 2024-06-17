@@ -37,7 +37,7 @@ const long interval = 5000;
 
 int x = 0;
 int y = 0;
-bool last_switch1Status = false;
+// bool last_switch1Status = false;
 char last_SWITCHSTATUS = 0;
 
 lv_coord_t init_series_array1[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -63,8 +63,10 @@ char parse(String _inputString);
 void screen_update(char n);
 String httpGETRequest(const char* serverName);
 void changeWifiNode(char _selectWifiNode, char _changeNode);
-void switchBoard(char __Switchstatus, char _last_Switchstatus);
+void httpSendButtonStatus(char __Switchstatus, char _last_Switchstatus);
 void  setup_WifiNode(void);
+void ScreenSwitchesDebug(void);
+void connectionStatusSwitchBoard(void);
 
 AsyncWebServer client(80);
 
@@ -100,13 +102,11 @@ void my_disp_flush( lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *colo
 static void my_touchpad_read( lv_indev_drv_t * indev_driver, lv_indev_data_t * data )
 {
     uint16_t touchX, touchY;
-
     data->state = LV_INDEV_STATE_REL;
     bool touched = tft.getTouch( &touchX, &touchY);
     if( touched )
     {
         data->state = LV_INDEV_STATE_PR;
-
         /*Set the coordinates*/
         data->point.x = touchX;
         data->point.y = touchY;
@@ -137,13 +137,8 @@ void calibrate() // function to calibrate ILI9341 TFT screen
 }
 
 void setup(void) {
-  switch1Status = false;
+  // switch1Status = false;
   char _SWITCHSTATUS = 0;
-  
-  wifiNode[0] = (struct wifiActSensNode*)malloc(sizeof(struct wifiActSensNode));
-  wifiNode[1] = (struct wifiActSensNode*)malloc(sizeof(struct wifiActSensNode));
-  wifiNode[2] = (struct wifiActSensNode*)malloc(sizeof(struct wifiActSensNode));
-  wifiNode[3] = (struct wifiActSensNode*)malloc(sizeof(struct wifiActSensNode));
 
   Serial.begin(115200);
   // reserve 200 bytes for the inputString:
@@ -183,89 +178,66 @@ void setup(void) {
     request->send_P(200, "text/plain", "Message from ESP32 LCD");
   });  
 
-  setupWifi(_ssid1, _gateway1);
-  getWifi();
+  // setupWifi(_ssid1, _gateway1);
+  // getWifi();
   
-  setup_WifiNode();
+  // setup_WifiNode();
 }
 
 void loop() { 
+  // Serial.print("Active screen: ");
+  // Serial.print(sliderLevelValue, DEC);
+  // Serial.print(" screen1: ");
+  // Serial.print(screen1);
+  // Serial.print(" screen2: ");
+  // Serial.print(screen2);
+  // Serial.print(" screen3: ");
+  // Serial.println(screen3);
+
+  delay(10);
+
   lv_timer_handler();
   lv_tick_inc(1000);
-  if (stringComplete) {
-    Serial.println(inputString);
-    selectNode = inputString[0];
-    inputString = "";
-    stringComplete = false;
-  }
-  // Change Wifi Node
-  if (selectWifiNode != changeNode)
-  {    
-    changeWifiNode(selectWifiNode, changeNode);
-    Serial.print("wifiNode[selectWifiNode-1]: ");
-    Serial.println(wifiNode[selectWifiNode-1]->node);
-    screen_update(selectWifiNode);
-    changeNode = selectWifiNode;
-    Serial.print("SelectWifiNode: ");
-    Serial.println(selectWifiNode);
-  }  
-  // Check clicked button and send connected event
-  if (_SWITCHSTATUS != last_SWITCHSTATUS)
-  { 
-    switchBoard(_SWITCHSTATUS, last_SWITCHSTATUS); 
-    last_SWITCHSTATUS = _SWITCHSTATUS;
-    Serial.print("selectWifiNode-1: ");
-    Serial.println(selectWifiNode-1, DEC);
-    Serial.print("_SWITCHSTATUS/10-1: ");
-    Serial.print((_SWITCHSTATUS/10)-1, DEC);
-    Serial.print(" ");
-    Serial.println((_SWITCHSTATUS), DEC);
-    wifiNode[selectWifiNode-1]->sw[((_SWITCHSTATUS/10))-1] = _SWITCHSTATUS;
-    
-    Serial.print("NODE1 SWITCHSTATUS: ");
-    Serial.print(wifiNode[0]->sw[0], DEC);
-    Serial.print(" ");
-    Serial.print(wifiNode[0]->sw[1], DEC);
-    Serial.print(" ");
-    Serial.print(wifiNode[0]->sw[2], DEC);
-    Serial.print(" ");
-    Serial.println(wifiNode[0]->sw[3], DEC);
-    Serial.print("NODE2 SWITCHSTATUS: ");
-    Serial.print(wifiNode[1]->sw[0], DEC);
-    Serial.print(" ");
-    Serial.print(wifiNode[1]->sw[1], DEC);
-    Serial.print(" ");
-    Serial.print(wifiNode[1]->sw[2], DEC);
-    Serial.print(" ");
-    Serial.println(wifiNode[1]->sw[3], DEC);
-    Serial.print("NODE3 SWITCHSTATUS: ");
-    Serial.print(wifiNode[2]->sw[0], DEC);
-    Serial.print(" ");
-    Serial.print(wifiNode[2]->sw[1], DEC);
-    Serial.print(" ");
-    Serial.print(wifiNode[2]->sw[2], DEC);
-    Serial.print(" ");
-    Serial.println(wifiNode[2]->sw[3], DEC);
-  }
-  
-  if (WiFi.isConnected())
-  {
-    lv_label_set_text(ui_LabelStatus, "Wifi is connected!");
-    lv_obj_set_style_text_color(ui_LabelStatus, lv_color_hex(0x38403),  0);
-  }
-  else
-  {
-    lv_label_set_text(ui_LabelStatus, "Wifi is disconnected!");  
-    lv_obj_set_style_text_color(ui_LabelStatus, lv_color_hex(0xC40303), 0);  
-  }
-  
+
+  // if (stringComplete) 
+  // {
+  //   selectNode = inputString[0];
+  //   inputString = "";
+  //   stringComplete = false;
+  // }
+  // // Change Wifi Node
+  // if (selectWifiNode != changeNode)
+  // {    
+  //   changeWifiNode(selectWifiNode, changeNode);
+  //   screen_update(selectWifiNode);
+  //   changeNode = selectWifiNode;
+  // }  
+  // // Check clicked button and send connected event
+  // if (_SWITCHSTATUS != last_SWITCHSTATUS)
+  // { 
+  //   httpSendButtonStatus(_SWITCHSTATUS, last_SWITCHSTATUS); 
+  //   last_SWITCHSTATUS = _SWITCHSTATUS;
+  //   wifiNode[selectWifiNode-1]->sw[((_SWITCHSTATUS/10))-1] = _SWITCHSTATUS;    
+  //   void ScreenSwitchesDebug();
+  // }
+
+  // connectionStatusSwitchBoard();
 }
 
-/*
-  SerialEvent occurs whenever a new data comes in the hardware serial RX. This
-  routine is run between each time loop() runs, so using delay inside loop can
-  delay response. Multiple bytes of data may be available.
-*/
+void connectionStatusSwitchBoard(void)
+{  
+  // if (WiFi.isConnected())
+  // {
+  //   lv_label_set_text(ui_LabelStatus, "Wifi is connected!");
+  //   lv_obj_set_style_text_color(ui_LabelStatus, lv_color_hex(0x38403),  0);
+  // }
+  // else
+  // {
+  //   lv_label_set_text(ui_LabelStatus, "Wifi is disconnected!");  
+  //   lv_obj_set_style_text_color(ui_LabelStatus, lv_color_hex(0xC40303), 0);  
+  // }
+}
+
 char parse(String _inputString){
   char _val = _inputString.toInt();
   return _val;
@@ -287,14 +259,14 @@ void screen_update(char n)
   relayLbtColor[2] = wifiNode[n]->sw[2] == 33 ? (int)230403 : (int)12845827;
   relayLbtColor[3] = wifiNode[n]->sw[3] == 44 ? (int)230403 : (int)12845827;
   
-  _ui_label_set_property(ui_LabelBtnRelay1, _UI_LABEL_PROPERTY_TEXT, relayStatus[0]);
-  lv_obj_set_style_text_color(ui_LabelBtnRelay1, lv_color_hex(relayLbtColor[0]), LV_PART_MAIN | LV_STATE_DEFAULT);
-  _ui_label_set_property(ui_LabelBtnRelay2, _UI_LABEL_PROPERTY_TEXT, relayStatus[1]);
-  lv_obj_set_style_text_color(ui_LabelBtnRelay2, lv_color_hex(relayLbtColor[1]), LV_PART_MAIN | LV_STATE_DEFAULT);
-  _ui_label_set_property(ui_LabelBtnRelay3, _UI_LABEL_PROPERTY_TEXT, relayStatus[2]);
-  lv_obj_set_style_text_color(ui_LabelBtnRelay3, lv_color_hex(relayLbtColor[2]), LV_PART_MAIN | LV_STATE_DEFAULT);
-  _ui_label_set_property(ui_LabelBtnRelay4, _UI_LABEL_PROPERTY_TEXT, relayStatus[3]);
-  lv_obj_set_style_text_color(ui_LabelBtnRelay4, lv_color_hex(relayLbtColor[3]), LV_PART_MAIN | LV_STATE_DEFAULT);
+  // _ui_label_set_property(ui_LabelBtnRelay1, _UI_LABEL_PROPERTY_TEXT, relayStatus[0]);
+  // lv_obj_set_style_text_color(ui_LabelBtnRelay1, lv_color_hex(relayLbtColor[0]), LV_PART_MAIN | LV_STATE_DEFAULT);
+  // _ui_label_set_property(ui_LabelBtnRelay2, _UI_LABEL_PROPERTY_TEXT, relayStatus[1]);
+  // lv_obj_set_style_text_color(ui_LabelBtnRelay2, lv_color_hex(relayLbtColor[1]), LV_PART_MAIN | LV_STATE_DEFAULT);
+  // _ui_label_set_property(ui_LabelBtnRelay3, _UI_LABEL_PROPERTY_TEXT, relayStatus[2]);
+  // lv_obj_set_style_text_color(ui_LabelBtnRelay3, lv_color_hex(relayLbtColor[2]), LV_PART_MAIN | LV_STATE_DEFAULT);
+  // _ui_label_set_property(ui_LabelBtnRelay4, _UI_LABEL_PROPERTY_TEXT, relayStatus[3]);
+  // lv_obj_set_style_text_color(ui_LabelBtnRelay4, lv_color_hex(relayLbtColor[3]), LV_PART_MAIN | LV_STATE_DEFAULT);
 }
 
 /*************************************************************
@@ -392,7 +364,7 @@ void changeWifiNode(char _selectWifiNode, char _changeNode)
   }
 }
 
-void switchBoard(char __Switchstatus, char _last_Switchstatus)
+void httpSendButtonStatus(char __Switchstatus, char _last_Switchstatus)
 { 
   if (_SWITCHSTATUS != _last_Switchstatus)
     {    
@@ -446,7 +418,12 @@ void switchBoard(char __Switchstatus, char _last_Switchstatus)
 }
 
 void  setup_WifiNode(void)
-{
+{    
+  wifiNode[0] = (struct wifiActSensNode*)malloc(sizeof(struct wifiActSensNode));
+  wifiNode[1] = (struct wifiActSensNode*)malloc(sizeof(struct wifiActSensNode));
+  wifiNode[2] = (struct wifiActSensNode*)malloc(sizeof(struct wifiActSensNode));
+  wifiNode[3] = (struct wifiActSensNode*)malloc(sizeof(struct wifiActSensNode));
+
   char i = (wifiNode[0]->node= 1)-1;
   wifiNode[0]->ssid = _ssid1;
   wifiNode[0]->gateway[i] = _gateway1;
@@ -470,4 +447,32 @@ void  setup_WifiNode(void)
   wifiNode[2]->sw[1]= 20;
   wifiNode[2]->sw[2]= 30;
   wifiNode[2]->sw[3]= 40;
+}
+
+void ScreenSwitchesDebug()
+{
+    Serial.print("NODE1 SWITCHSTATUS: ");
+    Serial.print(wifiNode[0]->sw[0], DEC);
+    Serial.print(" ");
+    Serial.print(wifiNode[0]->sw[1], DEC);
+    Serial.print(" ");
+    Serial.print(wifiNode[0]->sw[2], DEC);
+    Serial.print(" ");
+    Serial.println(wifiNode[0]->sw[3], DEC);
+    Serial.print("NODE2 SWITCHSTATUS: ");
+    Serial.print(wifiNode[1]->sw[0], DEC);
+    Serial.print(" ");
+    Serial.print(wifiNode[1]->sw[1], DEC);
+    Serial.print(" ");
+    Serial.print(wifiNode[1]->sw[2], DEC);
+    Serial.print(" ");
+    Serial.println(wifiNode[1]->sw[3], DEC);
+    Serial.print("NODE3 SWITCHSTATUS: ");
+    Serial.print(wifiNode[2]->sw[0], DEC);
+    Serial.print(" ");
+    Serial.print(wifiNode[2]->sw[1], DEC);
+    Serial.print(" ");
+    Serial.print(wifiNode[2]->sw[2], DEC);
+    Serial.print(" ");
+    Serial.println(wifiNode[2]->sw[3], DEC);
 }
