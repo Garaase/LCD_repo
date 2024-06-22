@@ -7,9 +7,10 @@
 #include <HTTPClient.h>
 #include <AsyncElegantOTA.h>
 #include "setupWifi.h"
-
 #include <stdlib.h>
 
+
+/******************************************************************/
 const char* serverNameTemp = "http://192.168.4.2/sensorData";
 const char* serverNameOnLed1 = "http://192.168.4.2/onLed1";
 const char* serverNameOffLed1 = "http://192.168.4.2/offLed1";
@@ -19,22 +20,9 @@ const char* serverNameOnLed3 = "http://192.168.4.2/onLed3";
 const char* serverNameOffLed3 = "http://192.168.4.2/offLed3";
 const char* serverNameOnLed4 = "http://192.168.4.2/onLed4";
 const char* serverNameOffLed4 = "http://192.168.4.2/offLed4";
-bool toggleOnOff = false;
-
-
-String sw1 = "*";
-String sw2 = "*";
-String sw3 = "*";
-String sw4 = "*";
-char sw1num = 0;
-char sw2num = 0;
-char sw3num = 0;
-char sw4num = 0;
-char lastSWnum = 0;
-char lastSW1num = 0;
-char lastSW2num = 0;
-char lastSW3num = 0;
-char lastSW4num = 0;
+const char* serverNameTemperature = "http://192.168.4.2/temperature";
+const char* serverNamePressure = "http://192.168.4.2/pressure";
+const char* serverNameHumidity = "http://192.168.4.2/humidity";
 
 IPAddress _gateway1(192, 168, 4, 2);
 IPAddress _gateway2(192, 168, 5, 2);
@@ -42,60 +30,9 @@ IPAddress _gateway3(192, 168, 6, 2);
 const char* _ssid1 = "ESP32-NODE-1";
 const char* _ssid2 = "ESP32-NODE-2";
 const char* _ssid3 = "ESP32-NODE-3";
-
-String sensorData;
-unsigned long previousMillis = 0;
-const long interval = 5000; 
-
-#define W  800
-#define H  480
-
-int x = 0;
-int y = 0;
-// bool last_switch1Status = false;
-char last_SWITCHSTATUS = 0;
-
-lv_coord_t init_series_array1[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-lv_coord_t init_series_array2[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-static lv_disp_draw_buf_t draw_buf;
-static lv_color_t disp_draw_buf[W * H / 10]; 
-static lv_disp_drv_t disp_drv;
-
-// BOARD_SC01, BOARD_SC01_PLUS, BOARD_SC02, BOARD_SC05, BOARD_KC01, BOARD_BC02
-PanelLan tft(BOARD_SC05);
-static LGFX_Sprite sprite (&tft) ;
-
-String inputString = "";      // a String to hold incoming data
-bool stringComplete = false;  // whether the string is complete
-char val = 10;
-int _val = 0;
-int scReferesh = 0;
-char selectNode = '0';
-char changeNode = '0';
-unsigned long previousLockScreenMillis = 0;
-const long intervalLockScreen = 10000;
-uint16_t  previousScreenOnFocus = 1;
-
-enum SCREEN
-{
-  NOSCREEN = 0,
-  SPLASH = 1,
-  WEATHER = 2,
-  SWITCHES = 3
-};
-
-char parse(String _inputString);
-void screen_update(char n);
-String httpGETRequest(const char* serverName);
-void changeWifiNode(char _selectWifiNode, char _changeNode);
-void httpSendButtonStatus(char __Switchstatus, char _last_Switchstatus);
-void  setup_WifiNode(void);
-void ScreenSwitchesDebug(void);
-void connectionStatusSwitchBoard(void);
-void lockScreen(void);
-
-AsyncWebServer client(80);
+String Nonde1Name = "ESP32-NODE-1";
+String Nonde2Name = "ESP32-NODE-2";
+String Nonde3Name = "ESP32-NODE-3";
 
 struct wifiActSensNode 
 {
@@ -107,6 +44,66 @@ struct wifiActSensNode
 
 // Create three wifiActSensNodes
 struct wifiActSensNode *wifiNode[3] = {NULL, NULL, NULL};
+/******************************************************************/
+
+String sw1 = "*";
+String sw2 = "*";
+String sw3 = "*";
+String sw4 = "*";
+char sw1num = 0;
+char sw2num = 0;
+char sw3num = 0;
+char sw4num = 0;
+char lastSW1num = 0;
+char lastSW2num = 0;
+char lastSW3num = 0;
+char lastSW4num = 0;
+
+String sensorData;
+char previousScreenLastOnFocus;
+unsigned long previousLockScreenMillis = 0;
+const long intervalLockScreen = 10000;
+unsigned long previousNode3Millis = 0;
+long intervalNode3 = 100;
+
+String inputString = "";      // a String to hold incoming data
+bool stringComplete = false;  // whether the string is complete
+char last_SWITCHSTATUS = 0;
+
+enum SCREEN
+{
+  NOSCREEN = 0,
+  SPLASH = 1,
+  WEATHER = 2,
+  SWITCHES_NODE1 = 3,
+  SWITCHES_NODE2 = 4
+};
+
+void screen_update(char n);
+String httpGETRequest(const char* serverName);
+void buttonHandler(void);
+void httpSendButtonStatus(char __Switchstatus, char _last_Switchstatus);
+void setup_WifiNode(void);
+void ScreenSwitchesDebug(void);
+void lockScreen(void);
+void node3_Data(boolean n);
+void lv_ex_gauge_1(void);
+
+/******************************************************************/
+#define W  800
+#define H  480
+int x = 0;
+int y = 0;
+static lv_disp_draw_buf_t draw_buf;
+static lv_color_t disp_draw_buf[W * H / 10]; 
+static lv_disp_drv_t disp_drv;
+
+// BOARD_SC01, BOARD_SC01_PLUS, BOARD_SC02, BOARD_SC05, BOARD_KC01, BOARD_BC02
+PanelLan tft(BOARD_SC05);
+static LGFX_Sprite sprite (&tft) ;
+
+AsyncWebServer client(80);
+/******************************************************************/
 
 String checkTemp() {
   return String("Hello from client");
@@ -164,7 +161,6 @@ void calibrate() // function to calibrate ILI9341 TFT screen
 }
 
 void setup(void) {
-  // switch1Status = false;
   char _SWITCHSTATUS = 0;
 
   Serial.begin(115200);
@@ -201,100 +197,80 @@ void setup(void) {
   client.on("/check", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/plain", checkTemp().c_str());
   });
-    client.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+  client.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/plain", "Message from ESP32 LCD");
   });  
 
   setupWifi(_ssid1, _gateway1);
   getWifi();
   
-  // setup_WifiNode();
   screenLastOnFocus = 2;
+  previousScreenLastOnFocus = 0;
   lockScreenTimer = millis();
+
+  lv_ex_gauge_1(();
 }
 
 void loop() { 
+  boolean node1 = Nonde1Name.equals( WiFi.SSID());
+  boolean node2 = Nonde2Name.equals( WiFi.SSID());
+  boolean node3 = Nonde3Name.equals( WiFi.SSID());
   enum SCREEN scr = NOSCREEN;
-   switch (screenLastOnFocus)
-   {
-    case SPLASH:
-      //Serial.print("Splash screen: ");
-      break;
-    case WEATHER:
-      //Serial.println("Weather screen ");   
-      break;
-    case SWITCHES:
-      //Serial.println("Switches screen ");
-      //setupWifi(_ssid1, _gateway1);
-      //Serial.println(getWifi());
-      break;   
-    default:
-      //Serial.println("splash screen ");
-      break;
-   }
 
+  if (previousScreenLastOnFocus != screenLastOnFocus)
+  {  
+    Serial.print("screenLastOnFocus: ");
+    Serial.println(screenLastOnFocus, DEC);
+    switch (screenLastOnFocus)
+    {
+      case SPLASH:
+        //---
+        break;
+      case WEATHER:
+        if (!node3)
+        {        
+          setupWifi(_ssid3, _gateway3);
+          getWifi();       
+        } 
+        else
+        {        
+        }   
+        break;
+      case SWITCHES_NODE1:
+        if (!node1)
+        {        
+          setupWifi(_ssid1, _gateway1);
+          getWifi();       
+        }      
+        break;   
+      case SWITCHES_NODE2:
+        if (!node2)
+        { 
+          setupWifi(_ssid2, _gateway2);
+          getWifi();  
+        } 
+        break; 
+      default:
+        //---
+        break;
+    }    
+    previousScreenLastOnFocus = screenLastOnFocus;
+  }
+  
+  node3_Data(node3);
   delay(10);
 
-  lv_timer_handler();
-  lv_tick_inc(1000);
-
   // Check clicked button and send connected event
-  if (_SWITCHSTATUS != last_SWITCHSTATUS)
-  {
-    lockScreenTimer = millis();
-    sw1 = ui_Switch1->state == 3 ? "ON": sw1;
-    sw1 = ui_Switch1->state == 2 ? "OFF": sw1;
-    sw2 = ui_Switch2->state == 3 ? "ON": sw2;
-    sw2 = ui_Switch2->state == 2 ? "OFF": sw2;
-    sw3 = ui_Switch3->state == 3 ? "ON": sw3;
-    sw3 = ui_Switch3->state == 2 ? "OFF": sw3;
-    sw4 = ui_Switch4->state == 3 ? "ON": sw4;
-    sw4 = ui_Switch4->state == 2 ? "OFF": sw4;
-    
-    Serial.print("ui_Switch1->state: ");
-    Serial.print(sw1);
-    Serial.print("    ui_Switch2->state: ");
-    Serial.print(sw2);
-    Serial.print("    ui_Switch3->state: ");
-    Serial.print(sw3);
-    Serial.print("    ui_Switch4->state: ");
-    Serial.print(sw4);    
-    Serial.print("    _SWITCHSTATUS: ");
-    Serial.println(_SWITCHSTATUS, DEC);
-    httpSendButtonStatus(_SWITCHSTATUS, last_SWITCHSTATUS);
+  buttonHandler();
 
-    last_SWITCHSTATUS = _SWITCHSTATUS;
-
-    lastSW1num = sw1num;
-    lastSW2num = sw2num;
-    lastSW3num = sw3num;
-    lastSW4num = sw4num;    
-  }
-
-  // connectionStatusSwitchBoard();
   if (!splashScreenOn)
   {
     lockScreen(); 
   }
-}
 
-void connectionStatusSwitchBoard(void)
-{  
-  // if (WiFi.isConnected())
-  // {
-  //   lv_label_set_text(ui_LabelStatus, "Wifi is connected!");
-  //   lv_obj_set_style_text_color(ui_LabelStatus, lv_color_hex(0x38403),  0);
-  // }
-  // else
-  // {
-  //   lv_label_set_text(ui_LabelStatus, "Wifi is disconnected!");  
-  //   lv_obj_set_style_text_color(ui_LabelStatus, lv_color_hex(0xC40303), 0);  
-  // }
-}
-
-char parse(String _inputString){
-  char _val = _inputString.toInt();
-  return _val;
+  // GUI Handler
+  lv_timer_handler();
+  lv_tick_inc(1000);
 }
 
 void screen_update(char n)
@@ -312,15 +288,6 @@ void screen_update(char n)
   relayLbtColor[1] = wifiNode[n]->sw[1] == 22 ? (int)230403 : (int)12845827;
   relayLbtColor[2] = wifiNode[n]->sw[2] == 33 ? (int)230403 : (int)12845827;
   relayLbtColor[3] = wifiNode[n]->sw[3] == 44 ? (int)230403 : (int)12845827;
-  
-  // _ui_label_set_property(ui_LabelBtnRelay1, _UI_LABEL_PROPERTY_TEXT, relayStatus[0]);
-  // lv_obj_set_style_text_color(ui_LabelBtnRelay1, lv_color_hex(relayLbtColor[0]), LV_PART_MAIN | LV_STATE_DEFAULT);
-  // _ui_label_set_property(ui_LabelBtnRelay2, _UI_LABEL_PROPERTY_TEXT, relayStatus[1]);
-  // lv_obj_set_style_text_color(ui_LabelBtnRelay2, lv_color_hex(relayLbtColor[1]), LV_PART_MAIN | LV_STATE_DEFAULT);
-  // _ui_label_set_property(ui_LabelBtnRelay3, _UI_LABEL_PROPERTY_TEXT, relayStatus[2]);
-  // lv_obj_set_style_text_color(ui_LabelBtnRelay3, lv_color_hex(relayLbtColor[2]), LV_PART_MAIN | LV_STATE_DEFAULT);
-  // _ui_label_set_property(ui_LabelBtnRelay4, _UI_LABEL_PROPERTY_TEXT, relayStatus[3]);
-  // lv_obj_set_style_text_color(ui_LabelBtnRelay4, lv_color_hex(relayLbtColor[3]), LV_PART_MAIN | LV_STATE_DEFAULT);
 }
 
 /*************************************************************
@@ -330,30 +297,18 @@ void screen_update(char n)
 String httpGETRequest(const char* serverName) 
 {
   WiFiClient client;
-  HTTPClient http;
-    
+  HTTPClient http;    
   
-  http.begin(client, serverName);
-  
+  http.begin(client, serverName);  
   // Send HTTP POST request
-  int httpResponseCode = http.GET();
-  
-  String payload = "--"; 
-  
+  int httpResponseCode = http.GET();  
+  String payload = "--";   
   if (httpResponseCode>0) 
   {
-    //Serial.print("HTTP Response code: ");
-    //Serial.println(httpResponseCode);
-    payload = http.getString();
-  }
-  else 
-  {
-    //Serial.print("Error code: ");
-    //Serial.println(httpResponseCode);
+    payload = (http.getString()).c_str();
   }
   // Free resources
   http.end();
-
   return payload;
 }
 
@@ -371,51 +326,43 @@ void serialEvent() {
   }
 }
 
-void changeWifiNode(char _selectWifiNode, char _changeNode)
+void buttonHandler(void)
 {
-  if (_selectWifiNode == 1 && _changeNode != _selectWifiNode)
-  {      
-    setupWifi(_ssid1, _gateway1);
-    getWifi();
-    _changeNode = _selectWifiNode;
-  }
-  else if (_selectWifiNode == 2 && _changeNode != _selectWifiNode)
-  {      
-    setupWifi(_ssid2, _gateway2);
-    getWifi();
-    _changeNode = _selectWifiNode;
-  } 
-  else if (_selectWifiNode == 3 && _changeNode != _selectWifiNode)
-  {      
-    setupWifi(_ssid3, _gateway3);
-    getWifi();
-    _changeNode = _selectWifiNode;
-  } 
-  
-  if (_selectWifiNode == 1 || _selectWifiNode == 2 || _selectWifiNode == 3)
+   // Check clicked button and send connected event
+  if (_SWITCHSTATUS != last_SWITCHSTATUS)
   {
-    unsigned long currentMillis = millis();
+    lockScreenTimer = millis();
 
-    if(currentMillis - previousMillis >= interval) 
-    {
-      // Check WiFi connection status
-      if(WiFi.status() == WL_CONNECTED )
-      { 
-        //Serial.print("Gateway IP: ");
-        //Serial.print(WiFi.gatewayIP());
-        //Serial.print(" & local IP: ");
-        //Serial.println(WiFi.localIP());
-        sensorData = httpGETRequest(serverNameTemp);
-        //Serial.println("Sensor Data: " + sensorData +".");
-        // save the last HTTP GET Request
-        previousMillis = currentMillis;
-      }
-      else 
-      {
-        //Serial.println("WiFi Disconnected");
-      }
-    }
+    sw1 = ui_Switch1_Node1->state == 3 ? "ON": sw1;
+    sw1 = ui_Switch1_Node1->state == 2 ? "OFF": sw1;
+    sw2 = ui_Switch2_Node1->state == 3 ? "ON": sw2;
+    sw2 = ui_Switch2_Node1->state == 2 ? "OFF": sw2;
+    sw3 = ui_Switch3_Node1->state == 3 ? "ON": sw3;
+    sw3 = ui_Switch3_Node1->state == 2 ? "OFF": sw3;
+    sw4 = ui_Switch4_Node1->state == 3 ? "ON": sw4;
+    sw4 = ui_Switch4_Node1->state == 2 ? "OFF": sw4;
+    
+    Serial.print("ui_Switch1_Node1->state: ");
+    Serial.print(sw1);
+    Serial.print("    ui_Switch2_Node1->state: ");
+    Serial.print(sw2);
+    Serial.print("    ui_Switch3_Node1->state: ");
+    Serial.print(sw3);
+    Serial.print("    ui_Switch4_Node1->state: ");
+    Serial.print(sw4);    
+    Serial.print("    _SWITCHSTATUS: ");
+    Serial.println(_SWITCHSTATUS, DEC);
+
+    httpSendButtonStatus(_SWITCHSTATUS, last_SWITCHSTATUS);
+
+    last_SWITCHSTATUS = _SWITCHSTATUS;
+
+    lastSW1num = sw1num;
+    lastSW2num = sw2num;
+    lastSW3num = sw3num;
+    lastSW4num = sw4num;    
   }
+
 }
 
 void httpSendButtonStatus(char __Switchstatus, char _last_Switchstatus)
@@ -425,42 +372,42 @@ void httpSendButtonStatus(char __Switchstatus, char _last_Switchstatus)
       switch (_SWITCHSTATUS)
       {
         case 11:
-          //Serial.println("Switch1 is ON");
+          //Serial.println("Switch1_Node1 is ON");
           sensorData = httpGETRequest(serverNameOnLed1);
           //Serial.println("Sensor Data (lamp 1 on): " + sensorData +".");
           break;
         case 10:
-          //Serial.println("Switch1 is OFF");
+          //Serial.println("Switch1_Node1 is OFF");
           sensorData = httpGETRequest(serverNameOffLed1);
           //Serial.println("Sensor Data (lamp 1 off): " + sensorData +".");
           break;  
         case 22:
-          //Serial.println("Switch2 is ON");
+          //Serial.println("Switch2_Node1 is ON");
           sensorData = httpGETRequest(serverNameOnLed2);
           //Serial.println("Sensor Data (lamp 2 on): " + sensorData +".");
           break;
         case 20:
-          //Serial.println("Switch2 is OFF");
+          //Serial.println("Switch2_Node1 is OFF");
           sensorData = httpGETRequest(serverNameOffLed2);
           //Serial.println("Sensor Data (lamp 2 off): " + sensorData +".");
           break;  
         case 33:
-          //Serial.println("Switch3 is ON");
+          //Serial.println("Switch3_Node1 is ON");
           sensorData = httpGETRequest(serverNameOnLed3);
           //Serial.println("Sensor Data (lamp 3 on): " + sensorData +".");
           break;
         case 30:
-          //Serial.println("Switch3 is OFF");
+          //Serial.println("Switch3_Node1 is OFF");
           sensorData = httpGETRequest(serverNameOffLed3);
           //Serial.println("Sensor Data (lamp 3 off): " + sensorData +".");
           break;  
         case 44:
-          //Serial.println("Switch4 is ON");
+          //Serial.println("Switch4_Node1 is ON");
           sensorData = httpGETRequest(serverNameOnLed4);
           //Serial.println("Sensor Data (lamp 4 on): " + sensorData +".");
           break;
         case 40:
-          //Serial.println("Switch4 is OFF");
+          //Serial.println("Switch4_Node1 is OFF");
           sensorData = httpGETRequest(serverNameOffLed4);
           //Serial.println("Sensor Data (lamp 4 off): " + sensorData +".");
           break;  
@@ -539,4 +486,60 @@ void lockScreen(void)
       _ui_screen_change(&ui_splash, LV_SCR_LOAD_ANIM_FADE_ON, 0, 1500, &ui_splash_screen_init);
       lockScreenTimer = currentLockScreenMillis;
   } 
+}
+
+void node3_Data(boolean n)
+{  
+  
+  unsigned long currentNode3Millis = millis();
+  if (currentNode3Millis - previousNode3Millis >= intervalNode3) 
+  {   
+    if(n)
+    {
+      String temperature = "";
+      String pressure = "";
+      String MaxMinTemp = "";
+      String humidity = "";
+
+      temperature = httpGETRequest(serverNameTemperature);
+      pressure = httpGETRequest(serverNamePressure);
+      humidity = httpGETRequest(serverNameHumidity);
+
+      Serial.print("Temperature: ");
+      Serial.print(temperature);  
+      Serial.print("  ");
+      Serial.print("Pressure: ");
+      Serial.print(pressure);  
+      Serial.print("  ");
+      Serial.print("Humidity: ");
+      Serial.println(humidity); 
+      
+      lv_label_set_text(ui_LabelTempereture, temperature.c_str());
+      lv_label_set_text(ui_LabelHumidity, humidity.c_str());
+      lv_label_set_text(ui_LabelMaxMinTemp, temperature.c_str());
+      lv_label_set_text(ui_LabelPressure, pressure.c_str());
+    }  
+    previousNode3Millis = currentNode3Millis;
+    intervalNode3 = 10000;
+  } 
+}
+
+void lv_ex_gauge_1(void)
+{
+    /*Describe the color for the needles*/
+    static lv_color_t needle_colors[3];
+    needle_colors[0] = LV_COLOR_BLUE;
+    needle_colors[1] = LV_COLOR_ORANGE;
+    needle_colors[2] = LV_COLOR_PURPLE;
+
+    /*Create a gauge*/
+    lv_obj_t * gauge1 = lv_gauge_create(lv_scr_act(), NULL);
+    lv_gauge_set_needle_count(gauge1, 3, needle_colors);
+    lv_obj_set_size(gauge1, 200, 200);
+    lv_obj_align(gauge1, NULL, LV_ALIGN_CENTER, 0, 0);
+
+    /*Set the values*/
+    lv_gauge_set_value(gauge1, 0, 10);
+    lv_gauge_set_value(gauge1, 1, 20);
+    lv_gauge_set_value(gauge1, 2, 30);
 }

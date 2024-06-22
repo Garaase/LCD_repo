@@ -33,11 +33,15 @@ void setupWifi(const char* _ssid, IPAddress _gateway)
   }
   
   //If connection successful show IP address in serial monitor
-  Serial.println("");
+  Serial.println(" ");
   Serial.print("Connected to ");
-  Serial.println(_ssid);
+  Serial.print(_ssid);
+  Serial.println(" ");
   Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());  //IP address assigned to your ESP
+  Serial.print(WiFi.localIP());  //IP address assigned to your ESP
+  Serial.print(" ");
+  Serial.print("GateWay IP address: ");
+  Serial.println(WiFi.gatewayIP());
 }
 
 String getWifi()

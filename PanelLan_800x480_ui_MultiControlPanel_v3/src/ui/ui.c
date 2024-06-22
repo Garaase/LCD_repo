@@ -34,23 +34,33 @@ lv_obj_t * ui_Label1;
 lv_obj_t * ui_Label2;
 lv_obj_t * ui_Label3;
 
-
-// SCREEN: ui_ScreenSwitch
-void ui_ScreenSwitch_screen_init(void);
+// SCREEN: ui_ScreenSwitch_Node1
+void ui_ScreenSwitch_Node1_screen_init(void);
 void ui_event_ScreenSwitch(lv_event_t * e);
-lv_obj_t * ui_ScreenSwitch;
-lv_obj_t * ui_PanelTempereture1;
-lv_obj_t * ui_PanelHumidity1;
-lv_obj_t * ui_PanelMaxMinTemp1;
-lv_obj_t * ui_PanelPressure1;
-lv_obj_t * ui_LabelHeader1;
-lv_obj_t * ui_LabelHumidity1;
-lv_obj_t * ui_LabelMaxMinTemp1;
-lv_obj_t * ui_LabelPressure1;
-lv_obj_t * ui_Switch1;
-lv_obj_t * ui_Switch2;
-lv_obj_t * ui_Switch3;
-lv_obj_t * ui_Switch4;
+lv_obj_t * ui_LabelHeader_Node1;
+lv_obj_t * ui_ScreenSwitch_Node1;
+lv_obj_t * ui_PanelSwitch1_Node1;
+lv_obj_t * ui_PanelSwitch2_Node1;
+lv_obj_t * ui_PanelSwitch3_Node1;
+lv_obj_t * ui_PanelSwitch4_Node1;
+lv_obj_t * ui_Switch1_Node1;
+lv_obj_t * ui_Switch2_Node1;
+lv_obj_t * ui_Switch3_Node1;
+lv_obj_t * ui_Switch4_Node1;
+lv_obj_t * ui_Spinner1;
+// SCREEN: ui_ScreenSwitch_Node2
+void ui_ScreenSwitch_Node2_screen_init(void);
+void ui_event_ScreenSwitch(lv_event_t * e);
+lv_obj_t * ui_LabelHeader_Node2;
+lv_obj_t * ui_ScreenSwitch_Node2;
+lv_obj_t * ui_PanelSwitch1_Node2;
+lv_obj_t * ui_PanelSwitch2_Node2;
+lv_obj_t * ui_PanelSwitch3_Node2;
+lv_obj_t * ui_PanelSwitch4_Node2;
+lv_obj_t * ui_Switch1_Node2;
+lv_obj_t * ui_Switch2_Node2;
+lv_obj_t * ui_Switch3_Node2;
+lv_obj_t * ui_Switch4_Node2;
 lv_obj_t * ui____initial_actions0;
 const lv_img_dsc_t * ui_imgset_patternb[1] = {&ui_img_pattern1b1_png};
 
@@ -70,8 +80,12 @@ void ui_event_splash(lv_event_t * e)
         }
         else if (screenLastOnFocus == 3)
         {
-            _ui_screen_change(&ui_ScreenSwitch, LV_SCR_LOAD_ANIM_FADE_ON, 1, 1500, &ui_ScreenSwitch_screen_init);
+            _ui_screen_change(&ui_ScreenSwitch_Node1, LV_SCR_LOAD_ANIM_FADE_ON, 1, 1500, &ui_ScreenSwitch_Node1_screen_init);
         }
+        else if (screenLastOnFocus == 4)
+        {
+            _ui_screen_change(&ui_ScreenSwitch_Node2, LV_SCR_LOAD_ANIM_FADE_ON, 1, 1500, &ui_ScreenSwitch_Node2_screen_init);
+        }        
         
         lockScreenTimer = millis();
     }
@@ -84,18 +98,42 @@ void ui_event_ScreenWeather(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT) {
-        //screenOnFocus = 3;
+    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_LEFT) {
         screenLastOnFocus = 3;
         lv_indev_wait_release(lv_indev_get_act());
-        _ui_screen_change(&ui_ScreenSwitch, LV_SCR_LOAD_ANIM_FADE_ON, 0, 400, &ui_ScreenSwitch_screen_init);
+        _ui_screen_change(&ui_ScreenSwitch_Node1, LV_SCR_LOAD_ANIM_FADE_ON, 0, 400, &ui_ScreenSwitch_Node1_screen_init);
+        lockScreenTimer = millis();
+    }
+    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT) {
+        screenLastOnFocus = 4;
+        lv_indev_wait_release(lv_indev_get_act());
+        _ui_screen_change(&ui_ScreenSwitch_Node2, LV_SCR_LOAD_ANIM_FADE_ON, 0, 400, &ui_ScreenSwitch_Node2_screen_init);
+        lockScreenTimer = millis();
+    }
+    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_BOTTOM) {
+        _ui_screen_change(&ui_splash, LV_SCR_LOAD_ANIM_FADE_ON, 0, 1500, &ui_splash_screen_init);
+        lockScreenTimer = millis();
+    }
+    if (event_code == LV_EVENT_ALL)
+    {
+        lockScreenTimer = millis();
+    } 
+    
+}
+void ui_event_ScreenSwitch_Node1(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT) {
+        screenLastOnFocus = 2;
+        lv_indev_wait_release(lv_indev_get_act());
+        _ui_screen_change(&ui_ScreenWeather, LV_SCR_LOAD_ANIM_FADE_ON, 0, 400, &ui_ScreenWeather_screen_init);
         lockScreenTimer = millis();
     }
     if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_LEFT) {
-        //screenOnFocus = 3;
-        screenLastOnFocus = 3;
+        screenLastOnFocus = 4;
         lv_indev_wait_release(lv_indev_get_act());
-        _ui_screen_change(&ui_ScreenSwitch, LV_SCR_LOAD_ANIM_FADE_ON, 0, 400, &ui_ScreenSwitch_screen_init);
+        _ui_screen_change(&ui_ScreenSwitch_Node2, LV_SCR_LOAD_ANIM_FADE_ON, 0, 400, &ui_ScreenSwitch_Node2_screen_init);
         lockScreenTimer = millis();
     }
     if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_BOTTOM) {
@@ -106,18 +144,55 @@ void ui_event_ScreenWeather(lv_event_t * e)
     if (event_code == LV_EVENT_ALL)
     {
         lockScreenTimer = millis();
-    } 
-    
+    }    
 }
-void ui_event_ScreenSwitch(lv_event_t * e)
+void ui_event_Switch1_Node1(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t * obj = lv_event_get_target(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        LV_UNUSED(obj);
+        //LV_LOG_USER("State: %s\n", lv_obj_has_state(obj, LV_STATE_CHECKED) ? "On" : "Off");
+        _SWITCHSTATUS = lv_obj_has_state(obj, LV_STATE_CHECKED) ? 11 : 10;
+    }
+}
+void ui_event_Switch2_Node1(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t * obj = lv_event_get_target(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        LV_UNUSED(obj);
+        _SWITCHSTATUS = lv_obj_has_state(obj, LV_STATE_CHECKED) ? 22 : 20;
+    }
+}
+void ui_event_Switch3_Node1(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t * obj = lv_event_get_target(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        LV_UNUSED(obj);
+        _SWITCHSTATUS = lv_obj_has_state(obj, LV_STATE_CHECKED) ? 33 : 30;
+    }
+}
+void ui_event_Switch4_Node1(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t * obj = lv_event_get_target(e);
+    if(code == LV_EVENT_VALUE_CHANGED) {
+        LV_UNUSED(obj);
+        _SWITCHSTATUS = lv_obj_has_state(obj, LV_STATE_CHECKED) ? 44 : 40;
+    }
+}
+
+void ui_event_ScreenSwitch_Node2(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT) {
         //screenOnFocus = 2;
-        screenLastOnFocus = 2;
+        screenLastOnFocus = 3;
         lv_indev_wait_release(lv_indev_get_act());
-        _ui_screen_change(&ui_ScreenWeather, LV_SCR_LOAD_ANIM_FADE_ON, 0, 400, &ui_ScreenWeather_screen_init);
+        _ui_screen_change(&ui_ScreenSwitch_Node1, LV_SCR_LOAD_ANIM_FADE_ON, 0, 400, &ui_ScreenSwitch_Node1_screen_init);
         lockScreenTimer = millis();
     }
     if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_LEFT) {
@@ -137,7 +212,7 @@ void ui_event_ScreenSwitch(lv_event_t * e)
         lockScreenTimer = millis();
     }    
 }
-void ui_event_Switch1(lv_event_t * e)
+void ui_event_Switch1_Node2(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t * obj = lv_event_get_target(e);
@@ -147,7 +222,7 @@ void ui_event_Switch1(lv_event_t * e)
         _SWITCHSTATUS = lv_obj_has_state(obj, LV_STATE_CHECKED) ? 11 : 10;
     }
 }
-void ui_event_Switch2(lv_event_t * e)
+void ui_event_Switch2_Node2(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t * obj = lv_event_get_target(e);
@@ -156,7 +231,7 @@ void ui_event_Switch2(lv_event_t * e)
         _SWITCHSTATUS = lv_obj_has_state(obj, LV_STATE_CHECKED) ? 22 : 20;
     }
 }
-void ui_event_Switch3(lv_event_t * e)
+void ui_event_Switch3_Node2(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t * obj = lv_event_get_target(e);
@@ -165,7 +240,7 @@ void ui_event_Switch3(lv_event_t * e)
         _SWITCHSTATUS = lv_obj_has_state(obj, LV_STATE_CHECKED) ? 33 : 30;
     }
 }
-void ui_event_Switch4(lv_event_t * e)
+void ui_event_Switch4_Node2(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     lv_obj_t * obj = lv_event_get_target(e);
@@ -174,6 +249,7 @@ void ui_event_Switch4(lv_event_t * e)
         _SWITCHSTATUS = lv_obj_has_state(obj, LV_STATE_CHECKED) ? 44 : 40;
     }
 }
+
 
 ///////////////////// SCREENS ////////////////////
 
@@ -185,7 +261,8 @@ void ui_init(void)
     lv_disp_set_theme(dispp, theme);
     ui_splash_screen_init();
     ui_ScreenWeather_screen_init();
-    ui_ScreenSwitch_screen_init();
+    ui_ScreenSwitch_Node1_screen_init();
+    ui_ScreenSwitch_Node2_screen_init();
     ui____initial_actions0 = lv_obj_create(NULL);
     lv_disp_load_scr(ui_splash);
 }
