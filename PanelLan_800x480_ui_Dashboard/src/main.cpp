@@ -7,8 +7,8 @@
 // #include <HTTPClient.h>
 // #include <AsyncElegantOTA.h>
 
-// const char* ssid = "void";
-// const char* password = "dhulkii11#d";
+// const char* ssid = "";
+// const char* password = "";
 // //Your IP address or domain name with URL path
 // const char* serverNameTemp = "http://192.168.68.59/sensorData";
 // String sensorData;
