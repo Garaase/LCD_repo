@@ -32,8 +32,8 @@ String sensorData;
 unsigned long previousMillis = 0;
 const long interval = 5000; 
 
-#define W  800
-#define H  480
+#define W  480
+#define H  800
 
 int x = 0;
 int y = 0;
@@ -151,6 +151,7 @@ void setup(void) {
   Serial.println("Started! ...");
 
   tft.begin();
+  tft.setRotation(1);
   tft.clear(TFT_BLACK); 
   //calibrate();
   delay(100);

@@ -23,6 +23,7 @@ const char* serverNameOffLed4 = "http://192.168.4.2/offLed4";
 const char* serverNameTemperature = "http://192.168.4.2/temperature";
 const char* serverNamePressure = "http://192.168.4.2/pressure";
 const char* serverNameHumidity = "http://192.168.4.2/humidity";
+const char* serverNameAltitude = "http://192.168.4.2/altitude";
 
 IPAddress _gateway1(192, 168, 4, 2);
 IPAddress _gateway2(192, 168, 5, 2);
@@ -30,9 +31,9 @@ IPAddress _gateway3(192, 168, 6, 2);
 const char* _ssid1 = "ESP32-NODE-1";
 const char* _ssid2 = "ESP32-NODE-2";
 const char* _ssid3 = "ESP32-NODE-3";
-String Nonde1Name = "ESP32-NODE-1";
-String Nonde2Name = "ESP32-NODE-2";
-String Nonde3Name = "ESP32-NODE-3";
+String Node1Name = "ESP32-NODE-1";
+String Node2Name = "ESP32-NODE-2";
+String Node3Name = "ESP32-NODE-3";
 
 struct wifiActSensNode 
 {
@@ -62,7 +63,7 @@ char lastSW4num = 0;
 String sensorData;
 char previousScreenLastOnFocus;
 unsigned long previousLockScreenMillis = 0;
-const long intervalLockScreen = 10000;
+long intervalLockScreen = 10000;
 unsigned long previousNode3Millis = 0;
 long intervalNode3 = 100;
 
@@ -86,8 +87,8 @@ void httpSendButtonStatus(char __Switchstatus, char _last_Switchstatus);
 void setup_WifiNode(void);
 void ScreenSwitchesDebug(void);
 void lockScreen(void);
-void node3_Data(boolean n);
-void lv_ex_gauge_1(void);
+void weather_Data(boolean n);
+void switchscreens(boolean node1, boolean node2, boolean node3);
 
 /******************************************************************/
 #define W  800
@@ -207,16 +208,57 @@ void setup(void) {
   screenLastOnFocus = 2;
   previousScreenLastOnFocus = 0;
   lockScreenTimer = millis();
-
-  lv_ex_gauge_1(();
 }
 
 void loop() { 
-  boolean node1 = Nonde1Name.equals( WiFi.SSID());
-  boolean node2 = Nonde2Name.equals( WiFi.SSID());
-  boolean node3 = Nonde3Name.equals( WiFi.SSID());
+  boolean node1 = Node1Name.equals( WiFi.SSID());
+  boolean node2 = Node2Name.equals( WiFi.SSID());
+  boolean node3 = Node3Name.equals( WiFi.SSID());
   enum SCREEN scr = NOSCREEN;
 
+  // Switch between the different screens
+  switchscreens(node1, node2, node3);
+  
+  // Update the weather screen
+  weather_Data(node3);
+
+  // Check clicked button and send connected event
+  buttonHandler();
+
+  // Auto-lock the screen of delay time elapsed
+  if (!splashScreenOn)
+  {
+    lockScreen(); 
+  }
+
+  // GUI Handler
+  lv_timer_handler();
+  lv_tick_inc(100);
+}
+
+/*************************************************************
+ *                     HELP FUNCTIONS                        *
+ *  Your Domain name with URL path or IP address with path   *
+ /************************************************************/
+void screen_update(char n)
+{
+  n = n-1;
+  const char * relayStatus[4] ={ "OFF", "OFF", "OFF", "OFF"};
+  int32_t relayLbtColor[4] = {(int)12845827, (int)12845827, (int)12845827, (int)12845827};
+
+  relayStatus[0] = wifiNode[n]->sw[0] == 11 ? "ON" : "OFF";
+  relayStatus[1] = wifiNode[n]->sw[1] == 22 ? "ON" : "OFF";
+  relayStatus[2] = wifiNode[n]->sw[2] == 33 ? "ON" : "OFF";
+  relayStatus[3] = wifiNode[n]->sw[3] == 44 ? "ON" : "OFF";
+
+  relayLbtColor[0] = wifiNode[n]->sw[0] == 11 ? (int)230403 : (int)12845827;
+  relayLbtColor[1] = wifiNode[n]->sw[1] == 22 ? (int)230403 : (int)12845827;
+  relayLbtColor[2] = wifiNode[n]->sw[2] == 33 ? (int)230403 : (int)12845827;
+  relayLbtColor[3] = wifiNode[n]->sw[3] == 44 ? (int)230403 : (int)12845827;
+}
+
+void switchscreens(boolean node1, boolean node2, boolean node3)
+{
   if (previousScreenLastOnFocus != screenLastOnFocus)
   {  
     Serial.print("screenLastOnFocus: ");
@@ -256,74 +298,17 @@ void loop() {
     }    
     previousScreenLastOnFocus = screenLastOnFocus;
   }
-  
-  node3_Data(node3);
-  delay(10);
-
-  // Check clicked button and send connected event
-  buttonHandler();
-
-  if (!splashScreenOn)
-  {
-    lockScreen(); 
-  }
-
-  // GUI Handler
-  lv_timer_handler();
-  lv_tick_inc(1000);
 }
 
-void screen_update(char n)
-{
-  n = n-1;
-  const char * relayStatus[4] ={ "OFF", "OFF", "OFF", "OFF"};
-  int32_t relayLbtColor[4] = {(int)12845827, (int)12845827, (int)12845827, (int)12845827};
-
-  relayStatus[0] = wifiNode[n]->sw[0] == 11 ? "ON" : "OFF";
-  relayStatus[1] = wifiNode[n]->sw[1] == 22 ? "ON" : "OFF";
-  relayStatus[2] = wifiNode[n]->sw[2] == 33 ? "ON" : "OFF";
-  relayStatus[3] = wifiNode[n]->sw[3] == 44 ? "ON" : "OFF";
-
-  relayLbtColor[0] = wifiNode[n]->sw[0] == 11 ? (int)230403 : (int)12845827;
-  relayLbtColor[1] = wifiNode[n]->sw[1] == 22 ? (int)230403 : (int)12845827;
-  relayLbtColor[2] = wifiNode[n]->sw[2] == 33 ? (int)230403 : (int)12845827;
-  relayLbtColor[3] = wifiNode[n]->sw[3] == 44 ? (int)230403 : (int)12845827;
-}
-
-/*************************************************************
- *                     HELP FUNCTIONS                        *
- *  Your Domain name with URL path or IP address with path   *
- /************************************************************/
-String httpGETRequest(const char* serverName) 
-{
-  WiFiClient client;
-  HTTPClient http;    
-  
-  http.begin(client, serverName);  
-  // Send HTTP POST request
-  int httpResponseCode = http.GET();  
-  String payload = "--";   
-  if (httpResponseCode>0) 
-  {
-    payload = (http.getString()).c_str();
-  }
-  // Free resources
-  http.end();
-  return payload;
-}
-
-void serialEvent() {
-  while (Serial.available()) {
-    // get the new byte:
-    char inChar = (char)Serial.read();
-    // add it to the inputString:
-    inputString += inChar;
-    // if the incoming character is a newline, set a flag so the main loop can
-    // do something about it:
-    if (inChar == '\n') {
-      stringComplete = true;
-    }
-  }
+void lockScreen(void)
+{  
+  unsigned long currentLockScreenMillis = millis();
+  if (currentLockScreenMillis - lockScreenTimer >= intervalLockScreen) {
+      screenOnFocus = 1;
+      _ui_screen_change(&ui_splash, LV_SCR_LOAD_ANIM_FADE_ON, 0, 1500, &ui_splash_screen_init);
+      lockScreenTimer = currentLockScreenMillis;
+      intervalLockScreen = 60000;
+  } 
 }
 
 void buttonHandler(void)
@@ -363,6 +348,72 @@ void buttonHandler(void)
     lastSW4num = sw4num;    
   }
 
+}
+
+void weather_Data(boolean n)
+{  
+  
+  unsigned long currentNode3Millis = millis();
+  if (currentNode3Millis - previousNode3Millis >= intervalNode3) 
+  {   
+    if(n)
+    {
+      String temperature = "";
+      String pressure = "";
+      String MaxMinTemp = "";
+      String humidity = "";
+      String altitude = "";
+
+      temperature = httpGETRequest(serverNameTemperature);
+      pressure = httpGETRequest(serverNamePressure);
+      humidity = httpGETRequest(serverNameHumidity);
+      altitude = httpGETRequest(serverNameAltitude);
+
+      Serial.print("Temperature: ");
+      Serial.print(temperature);  
+      Serial.print("  ");
+      Serial.print("Pressure: ");
+      Serial.print(pressure);  
+      Serial.print("  ");
+      Serial.print("Humidity: ");
+      Serial.println(humidity); 
+      Serial.print("  ");
+      Serial.print("Altitude: ");
+      Serial.println(altitude); 
+      
+      lv_label_set_text(ui_LabelValue1, temperature.c_str());      
+      lv_arc_set_value(ui_ArcGauge1, temperature.toInt());
+
+      lv_label_set_text(ui_LabelValue4, humidity.c_str());   
+      lv_arc_set_value(ui_ArcGauge4, humidity.toInt());
+
+      lv_label_set_text(ui_LabelValue3, altitude.c_str());   
+      lv_arc_set_value(ui_ArcGauge3, altitude.toInt());
+
+      lv_label_set_text(ui_LabelValue2, pressure.c_str());   
+      lv_arc_set_value(ui_ArcGauge2, pressure.toInt());
+    }  
+    previousNode3Millis = currentNode3Millis;
+    intervalNode3 = 10000;
+  } 
+}
+
+String httpGETRequest(const char* serverName) 
+{
+  WiFiClient client;
+  HTTPClient http;    
+  
+  http.begin(client, serverName);  
+  // Send HTTP POST request
+  int httpResponseCode = http.GET();  
+  String payload = "--";   
+  if (httpResponseCode>0) 
+  {
+    payload = (http.getString()).c_str();
+  }
+  // Free resources
+  http.end();
+  return payload;
 }
 
 void httpSendButtonStatus(char __Switchstatus, char _last_Switchstatus)
@@ -450,9 +501,23 @@ void  setup_WifiNode(void)
   wifiNode[2]->sw[3]= 40;
 }
 
+void serialEvent() {
+  while (Serial.available()) {
+    // get the new byte:
+    char inChar = (char)Serial.read();
+    // add it to the inputString:
+    inputString += inChar;
+    // if the incoming character is a newline, set a flag so the main loop can
+    // do something about it:
+    if (inChar == '\n') {
+      stringComplete = true;
+    }
+  }
+}
+
 void ScreenSwitchesDebug()
 {
-    //Serial.print("NODE1 SWITCHSTATUS: ");
+    Serial.print("NODE1 SWITCHSTATUS: ");
     Serial.print(wifiNode[0]->sw[0], DEC);
     Serial.print(" ");
     Serial.print(wifiNode[0]->sw[1], DEC);
@@ -476,70 +541,4 @@ void ScreenSwitchesDebug()
     Serial.print(wifiNode[2]->sw[2], DEC);
     Serial.print(" ");
     Serial.println(wifiNode[2]->sw[3], DEC);
-}
-
-void lockScreen(void)
-{  
-  unsigned long currentLockScreenMillis = millis();
-  if (currentLockScreenMillis - lockScreenTimer >= intervalLockScreen) {
-      screenOnFocus = 1;
-      _ui_screen_change(&ui_splash, LV_SCR_LOAD_ANIM_FADE_ON, 0, 1500, &ui_splash_screen_init);
-      lockScreenTimer = currentLockScreenMillis;
-  } 
-}
-
-void node3_Data(boolean n)
-{  
-  
-  unsigned long currentNode3Millis = millis();
-  if (currentNode3Millis - previousNode3Millis >= intervalNode3) 
-  {   
-    if(n)
-    {
-      String temperature = "";
-      String pressure = "";
-      String MaxMinTemp = "";
-      String humidity = "";
-
-      temperature = httpGETRequest(serverNameTemperature);
-      pressure = httpGETRequest(serverNamePressure);
-      humidity = httpGETRequest(serverNameHumidity);
-
-      Serial.print("Temperature: ");
-      Serial.print(temperature);  
-      Serial.print("  ");
-      Serial.print("Pressure: ");
-      Serial.print(pressure);  
-      Serial.print("  ");
-      Serial.print("Humidity: ");
-      Serial.println(humidity); 
-      
-      lv_label_set_text(ui_LabelTempereture, temperature.c_str());
-      lv_label_set_text(ui_LabelHumidity, humidity.c_str());
-      lv_label_set_text(ui_LabelMaxMinTemp, temperature.c_str());
-      lv_label_set_text(ui_LabelPressure, pressure.c_str());
-    }  
-    previousNode3Millis = currentNode3Millis;
-    intervalNode3 = 10000;
-  } 
-}
-
-void lv_ex_gauge_1(void)
-{
-    /*Describe the color for the needles*/
-    static lv_color_t needle_colors[3];
-    needle_colors[0] = LV_COLOR_BLUE;
-    needle_colors[1] = LV_COLOR_ORANGE;
-    needle_colors[2] = LV_COLOR_PURPLE;
-
-    /*Create a gauge*/
-    lv_obj_t * gauge1 = lv_gauge_create(lv_scr_act(), NULL);
-    lv_gauge_set_needle_count(gauge1, 3, needle_colors);
-    lv_obj_set_size(gauge1, 200, 200);
-    lv_obj_align(gauge1, NULL, LV_ALIGN_CENTER, 0, 0);
-
-    /*Set the values*/
-    lv_gauge_set_value(gauge1, 0, 10);
-    lv_gauge_set_value(gauge1, 1, 20);
-    lv_gauge_set_value(gauge1, 2, 30);
 }

@@ -20,19 +20,39 @@ lv_obj_t * ui_splash;
 void ui_ScreenWeather_screen_init(void);
 void ui_event_ScreenWeather(lv_event_t * e);
 lv_obj_t * ui_ScreenWeather;
-lv_obj_t * ui_PanelTempereture;
-lv_obj_t * ui_PanelHumidity;
-lv_obj_t * ui_PanelMaxMinTemp;
-lv_obj_t * ui_PanelPressure;
-lv_obj_t * ui_LabelHeader;
-lv_obj_t * ui_LabelTempereture;
-lv_obj_t * ui_LabelHumidity;
-lv_obj_t * ui_LabelMaxMinTemp;
-lv_obj_t * ui_LabelPressure;
+lv_obj_t * ui_PanelGaugeGroup1;
+void ui_event_ArcGauge1(lv_event_t * e);
+lv_obj_t * ui_ArcGauge1;
+lv_obj_t * ui_LabelValue1;
+lv_obj_t * ui_LabelUnit1;
+lv_obj_t * ui_LabelGaugeHeader1;
+lv_obj_t * ui_LabelMinValue1;
+lv_obj_t * ui_LabelMaxValue1;
+lv_obj_t * ui_PanelGaugeGroup2;
+void ui_event_ArcGauge2(lv_event_t * e);
+lv_obj_t * ui_ArcGauge2;
+lv_obj_t * ui_LabelValue2;
+lv_obj_t * ui_LabelUnit2;
+lv_obj_t * ui_LabelGaugeHeader2;
+lv_obj_t * ui_LabelMinValue2;
+lv_obj_t * ui_LabelMaxValue2;
+lv_obj_t * ui_PanelGaugeGroup3;
+void ui_event_ArcGauge3(lv_event_t * e);
+lv_obj_t * ui_ArcGauge3;
+lv_obj_t * ui_LabelValue3;
+lv_obj_t * ui_LabelUnit3;
+lv_obj_t * ui_LabelGaugeHeader3;
+lv_obj_t * ui_LabelMinValue3;
+lv_obj_t * ui_LabelMaxValue3;
+lv_obj_t * ui_PanelGaugeGroup4;
+void ui_event_ArcGauge4(lv_event_t * e);
+lv_obj_t * ui_ArcGauge4;
+lv_obj_t * ui_LabelValue4;
+lv_obj_t * ui_LabelUnit4;
+lv_obj_t * ui_LabelGaugeHeader4;
+lv_obj_t * ui_LabelMinValue4;
+lv_obj_t * ui_LabelMaxValue4;
 lv_obj_t * ui_Label4;
-lv_obj_t * ui_Label1;
-lv_obj_t * ui_Label2;
-lv_obj_t * ui_Label3;
 
 // SCREEN: ui_ScreenSwitch_Node1
 void ui_ScreenSwitch_Node1_screen_init(void);
@@ -250,7 +270,38 @@ void ui_event_Switch4_Node2(lv_event_t * e)
     }
 }
 
-
+void ui_event_ArcGauge1(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_VALUE_CHANGED) {
+        _ui_arc_set_text_value(ui_LabelValue1, target, "", "");
+    }
+}
+void ui_event_ArcGauge2(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_VALUE_CHANGED) {
+        _ui_arc_set_text_value(ui_LabelValue2, target, "", "");
+    }
+}
+void ui_event_ArcGauge3(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_VALUE_CHANGED) {
+        _ui_arc_set_text_value(ui_LabelValue3, target, "", "");
+    }
+}
+void ui_event_ArcGauge4(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_VALUE_CHANGED) {
+        _ui_arc_set_text_value(ui_LabelValue4, target, "", "");
+    }
+}
 ///////////////////// SCREENS ////////////////////
 
 void ui_init(void)
