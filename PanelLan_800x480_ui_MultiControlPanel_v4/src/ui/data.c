@@ -11,3 +11,7 @@ uint32_t lockScreenTimer = 0;
 bool splashScreenOn = false;
 char screenOnFocus = 0;
 char screenLastOnFocus = 2;
+bool imgBtn1Sc2_status = false;
+bool imgBtn2Sc2_status = false;
+bool imgBtn3Sc2_status = false;
+bool imgBtn4Sc2_status = false;

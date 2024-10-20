@@ -21,7 +21,6 @@ void ui_event_splash(lv_event_t * e);
 extern lv_obj_t * ui_splash;
 // SCREEN: ui_ScreenWeather
 void ui_ScreenWeather_screen_init(void);
-// void ui_event_ScreenWeather(lv_event_t * e);
 void ui_event_BtnSc1Left(lv_event_t * e);
 void ui_event_BtnSc1Right(lv_event_t * e);
 extern lv_obj_t * ui_ScreenWeather;
@@ -53,7 +52,6 @@ extern lv_obj_t * ui_BtnSc1Right;
 extern lv_obj_t * ui_lbSc1LoadStatus;
 
 void ui_ScreenSwitchNode1_screen_init(void);
-// void ui_event_ScreenSwitchNode1(lv_event_t * e);
 void ui_event_Switch1Node1(lv_event_t * e);
 void ui_event_Switch2Node1(lv_event_t * e);
 void ui_event_Switch3Node1(lv_event_t * e);
@@ -74,6 +72,10 @@ extern lv_obj_t * ui_Bar2;
 extern lv_obj_t * ui_BtnSc2Left;
 extern lv_obj_t * ui_BtnSc2Right;
 extern lv_obj_t * ui_lbSc2LoadStatus;
+extern lv_obj_t * ui_LbSwitch1Node1;
+extern lv_obj_t * ui_LbSwitch2Node1;
+extern lv_obj_t * ui_LbSwitch3Node1;
+extern lv_obj_t * ui_LbSwitch4Node1;
 
 void ui_ScreenSwitchNode2_screen_init(void);
 // void ui_event_ScreenSwitchNode2(lv_event_t * e);
@@ -97,6 +99,10 @@ extern lv_obj_t * ui_Bar1;
 extern lv_obj_t * ui_BtnSc3Left;
 extern lv_obj_t * ui_BtnSc3Right;
 extern lv_obj_t * ui_lbSc3LoadStatus;
+extern lv_obj_t * ui_LbSwitch1Node2;
+extern lv_obj_t * ui_LbSwitch2Node2;
+extern lv_obj_t * ui_LbSwitch3Node2;
+extern lv_obj_t * ui_LbSwitch4Node2;
 extern lv_obj_t * ui____initial_actions0;
 
 

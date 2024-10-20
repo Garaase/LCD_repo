@@ -20,4 +20,9 @@ enum SWITCHSTATUS
 };
 extern enum SWITCHSTATUS SwStatus;
 extern char screenOnFocus;
+
 extern char screenLastOnFocus;
+extern bool imgBtn1Sc2_status;
+extern bool imgBtn2Sc2_status;
+extern bool imgBtn3Sc2_status;
+extern bool imgBtn4Sc2_status;

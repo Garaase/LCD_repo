@@ -16,15 +16,21 @@ void ui_ScreenSwitchNode2_screen_init(void)
     lv_obj_set_style_bg_grad_dir(ui_ScreenSwitchNode2, LV_GRAD_DIR_VER, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Switch1Node2 = lv_switch_create(ui_ScreenSwitchNode2);
-    lv_obj_set_width(ui_Switch1Node2, 150);
+    lv_obj_set_width(ui_Switch1Node2, 135);
     lv_obj_set_height(ui_Switch1Node2, 130);
-    lv_obj_set_x(ui_Switch1Node2, -202);
+    lv_obj_set_x(ui_Switch1Node2, -200);
     lv_obj_set_y(ui_Switch1Node2, -50);
     lv_obj_set_align(ui_Switch1Node2, LV_ALIGN_CENTER);
-    lv_obj_set_style_bg_color(ui_Switch1Node2, lv_color_hex(0x484545), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_Switch1Node2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_color(ui_Switch1Node2, lv_color_hex(0xE40808), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_main_stop(ui_Switch1Node2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_stop(ui_Switch1Node2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_grad_dir(ui_Switch1Node2, LV_GRAD_DIR_VER, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_bg_color(ui_Switch1Node2, lv_color_hex(0xFE0505), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_Switch1Node2, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_color(ui_Switch1Node2, lv_color_hex(0xFFFFFF), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_main_stop(ui_Switch1Node2, 150, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_stop(ui_Switch1Node2, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_dir(ui_Switch1Node2, LV_GRAD_DIR_HOR, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
     lv_obj_set_style_bg_color(ui_Switch1Node2, lv_color_hex(0xF1EDED), LV_PART_KNOB | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Switch1Node2, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
@@ -32,15 +38,21 @@ void ui_ScreenSwitchNode2_screen_init(void)
     lv_obj_set_style_bg_grad_dir(ui_Switch1Node2, LV_GRAD_DIR_VER, LV_PART_KNOB | LV_STATE_DEFAULT);
 
     ui_Switch2Node2 = lv_switch_create(ui_ScreenSwitchNode2);
-    lv_obj_set_width(ui_Switch2Node2, 150);
+    lv_obj_set_width(ui_Switch2Node2, 135);
     lv_obj_set_height(ui_Switch2Node2, 130);
     lv_obj_set_x(ui_Switch2Node2, 200);
     lv_obj_set_y(ui_Switch2Node2, -50);
     lv_obj_set_align(ui_Switch2Node2, LV_ALIGN_CENTER);
-    lv_obj_set_style_bg_color(ui_Switch2Node2, lv_color_hex(0x484545), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_Switch2Node2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_color(ui_Switch2Node2, lv_color_hex(0xE40808), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_main_stop(ui_Switch2Node2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_stop(ui_Switch2Node2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_grad_dir(ui_Switch2Node2, LV_GRAD_DIR_VER, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_bg_color(ui_Switch2Node2, lv_color_hex(0xFE0505), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_Switch2Node2, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_color(ui_Switch2Node2, lv_color_hex(0xFFFFFF), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_main_stop(ui_Switch2Node2, 150, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_stop(ui_Switch2Node2, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_dir(ui_Switch2Node2, LV_GRAD_DIR_HOR, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
     lv_obj_set_style_bg_color(ui_Switch2Node2, lv_color_hex(0xF1EDED), LV_PART_KNOB | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Switch2Node2, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
@@ -48,15 +60,21 @@ void ui_ScreenSwitchNode2_screen_init(void)
     lv_obj_set_style_bg_grad_dir(ui_Switch2Node2, LV_GRAD_DIR_VER, LV_PART_KNOB | LV_STATE_DEFAULT);
 
     ui_Switch3Node2 = lv_switch_create(ui_ScreenSwitchNode2);
-    lv_obj_set_width(ui_Switch3Node2, 150);
+    lv_obj_set_width(ui_Switch3Node2, 135);
     lv_obj_set_height(ui_Switch3Node2, 130);
     lv_obj_set_x(ui_Switch3Node2, -200);
     lv_obj_set_y(ui_Switch3Node2, 120);
     lv_obj_set_align(ui_Switch3Node2, LV_ALIGN_CENTER);
-    lv_obj_set_style_bg_color(ui_Switch3Node2, lv_color_hex(0x484545), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_Switch3Node2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_color(ui_Switch3Node2, lv_color_hex(0xE40808), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_main_stop(ui_Switch3Node2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_stop(ui_Switch3Node2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_grad_dir(ui_Switch3Node2, LV_GRAD_DIR_VER, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_bg_color(ui_Switch3Node2, lv_color_hex(0xFE0505), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_Switch3Node2, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_color(ui_Switch3Node2, lv_color_hex(0xFFFFFF), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_main_stop(ui_Switch3Node2, 150, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_stop(ui_Switch3Node2, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_dir(ui_Switch3Node2, LV_GRAD_DIR_HOR, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
     lv_obj_set_style_bg_color(ui_Switch3Node2, lv_color_hex(0xF1EDED), LV_PART_KNOB | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Switch3Node2, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
@@ -64,15 +82,21 @@ void ui_ScreenSwitchNode2_screen_init(void)
     lv_obj_set_style_bg_grad_dir(ui_Switch3Node2, LV_GRAD_DIR_VER, LV_PART_KNOB | LV_STATE_DEFAULT);
 
     ui_Switch4Node2 = lv_switch_create(ui_ScreenSwitchNode2);
-    lv_obj_set_width(ui_Switch4Node2, 150);
+    lv_obj_set_width(ui_Switch4Node2, 135);
     lv_obj_set_height(ui_Switch4Node2, 130);
     lv_obj_set_x(ui_Switch4Node2, 200);
     lv_obj_set_y(ui_Switch4Node2, 120);
     lv_obj_set_align(ui_Switch4Node2, LV_ALIGN_CENTER);
-    lv_obj_set_style_bg_color(ui_Switch4Node2, lv_color_hex(0x484545), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_Switch4Node2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_color(ui_Switch4Node2, lv_color_hex(0xE40808), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_main_stop(ui_Switch4Node2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_stop(ui_Switch4Node2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_grad_dir(ui_Switch4Node2, LV_GRAD_DIR_VER, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_bg_color(ui_Switch4Node2, lv_color_hex(0xFE0505), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_Switch4Node2, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_color(ui_Switch4Node2, lv_color_hex(0xFFFFFF), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_main_stop(ui_Switch4Node2, 150, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_stop(ui_Switch4Node2, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_dir(ui_Switch4Node2, LV_GRAD_DIR_HOR, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
     lv_obj_set_style_bg_color(ui_Switch4Node2, lv_color_hex(0xF1EDED), LV_PART_KNOB | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Switch4Node2, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
@@ -95,23 +119,16 @@ void ui_ScreenSwitchNode2_screen_init(void)
     lv_obj_set_style_blend_mode(ui_Bar1, LV_BLEND_MODE_NORMAL, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
     ui_LabelHeaderNode2 = lv_label_create(ui_ScreenSwitchNode2);
-    lv_obj_set_width(ui_LabelHeaderNode2, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_LabelHeaderNode2, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_width(ui_LabelHeaderNode2, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_LabelHeaderNode2, LV_SIZE_CONTENT); 
     lv_obj_set_x(ui_LabelHeaderNode2, 0);
     lv_obj_set_y(ui_LabelHeaderNode2, -190);
     lv_obj_set_align(ui_LabelHeaderNode2, LV_ALIGN_CENTER);
     lv_label_set_text(ui_LabelHeaderNode2, "CONTROL PANEL 2");
     lv_obj_set_style_text_color(ui_LabelHeaderNode2, lv_color_hex(0x17552E), LV_PART_MAIN | LV_STATE_DEFAULT);
-    // lv_obj_set_style_text_opa(ui_LabelHeaderNode2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    // lv_obj_set_style_text_letter_space(ui_LabelHeaderNode2, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
-    // lv_obj_set_style_text_line_space(ui_LabelHeaderNode2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_LabelHeaderNode2, &lv_font_montserrat_48, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_shadow_color(ui_LabelHeaderNode2, lv_color_hex(0x49DC7F), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_shadow_opa(ui_LabelHeaderNode2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    // lv_obj_set_style_shadow_width(ui_LabelHeaderNode2, 200, LV_PART_MAIN | LV_STATE_DEFAULT);
-    // lv_obj_set_style_shadow_spread(ui_LabelHeaderNode2, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
-    // lv_obj_set_style_shadow_ofs_x(ui_LabelHeaderNode2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    // lv_obj_set_style_shadow_ofs_y(ui_LabelHeaderNode2, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_BtnSc3Right = lv_btn_create(ui_ScreenSwitchNode2);
     lv_obj_set_width(ui_BtnSc3Right, 40);
@@ -138,8 +155,8 @@ void ui_ScreenSwitchNode2_screen_init(void)
     lv_obj_set_style_bg_img_opa(ui_BtnSc3Left, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_lbSc3LoadStatus = lv_label_create(ui_ScreenSwitchNode2);
-    lv_obj_set_width(ui_lbSc3LoadStatus, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_lbSc3LoadStatus, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_width(ui_lbSc3LoadStatus, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_lbSc3LoadStatus, LV_SIZE_CONTENT); 
     lv_obj_set_x(ui_lbSc3LoadStatus, 0);
     lv_obj_set_y(ui_lbSc3LoadStatus, 225);
     lv_obj_set_align(ui_lbSc3LoadStatus, LV_ALIGN_CENTER);
@@ -149,9 +166,33 @@ void ui_ScreenSwitchNode2_screen_init(void)
                       LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE |
                       LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
                       LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
-    lv_obj_set_style_text_color(ui_lbSc3LoadStatus, lv_color_hex(0x635E5D), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_lbSc3LoadStatus, lv_color_hex(0x034905), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_lbSc3LoadStatus, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_LbSwitch1Node2 = lv_label_create(ui_Switch1Node2);
+    lv_obj_set_width(ui_LbSwitch1Node2, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_LbSwitch1Node2, LV_SIZE_CONTENT); 
+    lv_obj_set_align(ui_LbSwitch1Node2, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_LbSwitch1Node2, "Switch 1");
+	
+    ui_LbSwitch2Node2 = lv_label_create(ui_Switch2Node2);
+    lv_obj_set_width(ui_LbSwitch2Node2, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_LbSwitch2Node2, LV_SIZE_CONTENT); 
+    lv_obj_set_align(ui_LbSwitch2Node2, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_LbSwitch2Node2, "Switch 2");
+	
+	ui_LbSwitch3Node2 = lv_label_create(ui_Switch3Node2);
+    lv_obj_set_width(ui_LbSwitch3Node2, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_LbSwitch3Node2, LV_SIZE_CONTENT); 
+    lv_obj_set_align(ui_LbSwitch3Node2, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_LbSwitch3Node2, "Switch 3");
+	
+	ui_LbSwitch4Node2 = lv_label_create(ui_Switch4Node2);
+    lv_obj_set_width(ui_LbSwitch4Node2, LV_SIZE_CONTENT);
+    lv_obj_set_height(ui_LbSwitch4Node2, LV_SIZE_CONTENT); 
+    lv_obj_set_align(ui_LbSwitch4Node2, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_LbSwitch4Node2, "Switch 4");
+    
     lv_obj_add_event_cb( ui_Switch1Node2,	ui_event_Switch1Node2, 	LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb( ui_Switch2Node2, 	ui_event_Switch2Node2, 	LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb( ui_Switch3Node2, 	ui_event_Switch3Node2, 	LV_EVENT_ALL, NULL);
