@@ -1,0 +1,21 @@
+{
+    "files.associations": {
+        "*.tcc": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "system_error": "cpp",
+        "array": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "lv_bidi.h": "c",
+        "lv_txt.h": "c",
+        "lv_obj_draw.h": "c",
+        "lv_obj_style.h": "c",
+        "ui.h": "c",
+        "*.in": "cpp"
+    }
+}
