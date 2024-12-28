@@ -15,6 +15,6 @@ void ui_splash_screen_init(void)
     lv_obj_set_style_border_opa(ui_splash, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_splash, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_obj_add_event_cb(ui_splash, ui_event_splash, LV_EVENT_ALL, NULL);
+    //lv_obj_add_event_cb(ui_splash, ui_event_splash, LV_EVENT_ALL, NULL);
 
 }

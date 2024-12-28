@@ -17,7 +17,7 @@ extern "C" {
 
 // SCREEN: ui_splash
 void ui_splash_screen_init(void);
-void ui_event_splash(lv_event_t * e);
+//void ui_event_splash(lv_event_t * e);
 extern lv_obj_t * ui_splash;
 // SCREEN: ui_ScreenWeather
 void ui_ScreenWeather_screen_init(void);

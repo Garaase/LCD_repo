@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "configurations.h"
 #include "homeassistantapi.h"
+#include "driver/rtc_io.h"
 
 /******************************************************************/
 const char* haLED1 = "http://homeassistant.local:8123/api/webhook/test-led1";
@@ -40,12 +41,23 @@ char lastSW4num = 0;
 
 String sensorData;
 char previousScreenLastOnFocus;
-unsigned long previousLockScreenMillis = 0;
-long intervalLockScreen = 10000;
 int milisec = 1000;
-int delay5min = 60*5; //60s * 5 = 300s => 5min
+int delay5min =60*5;                          //60s * 5 = 300s => 5min
+long intervalLockScreen = delay5min*milisec;  // 5min
 unsigned long previousNode3Millis = 0;
-long intervalNode3 = 100;
+long intervalNode3 = 3000;
+
+unsigned long currentstopSplashScreenMillis = millis();
+unsigned long stopSplashScreenTimer = 0;
+long intervalstopSplashScreen = 3000; // 5s splash time
+
+long intervalDeepSleep = delay5min*milisec; // 5min
+long timeToSleepTimer = 0;
+RTC_DATA_ATTR unsigned long runMillis = 0;
+RTC_DATA_ATTR unsigned long sleepMillis = 0;
+#define USE_EXT0_WAKEUP          1              // 1 = EXT0 wakeup, 0 = EXT1 wakeup
+#define WAKEUP_GPIO              GPIO_NUM_1     // Only RTC IO are allowed - ESP32 Pin example
+int MOTION_GPIO  = GPIO_NUM_2;     // Only RTC IO are allowed - ESP32 Pin example
 
 String inputString = "";      // a String to hold incoming data
 bool stringComplete = false;  // whether the string is complete
@@ -60,12 +72,23 @@ enum SCREEN
   SWITCHES_NODE2 = 4
 };
 
+bool startScreen = true;
+bool wifiIsConnected = false;
+
+#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
+#define TIME_TO_SLEEP  30        /* Time ESP32 will go to sleep (in seconds) */
+RTC_DATA_ATTR int bootCount = 0;
+RTC_DATA_ATTR String timebetweenSleeps = "";
+void print_wakeup_reason();
+void prepToGoToSleep(void);
+
 String httpGETRequest(const char* serverName);
 void buttonHandler(void);
 void httpSendButtonStatus(char __Switchstatus, char _last_Switchstatus);
 void lockScreen(void);
 void weather_Data();
 void switchBetweenScreens();
+void stopSplashScreen(void);
 
 /******************************************************************/
 #define W  800
@@ -137,6 +160,8 @@ void calibrate() // function to calibrate ILI9341 TFT screen
 void setup(void) {
   char _SWITCHSTATUS = 0;
 
+  pinMode(MOTION_GPIO, INPUT);  // Define BUTTON pin as Input.
+
   Serial.begin(115200);
   // reserve 200 bytes for the inputString:
   inputString.reserve(1);
@@ -168,15 +193,70 @@ void setup(void) {
   // Start the ui (LCD)  
   ui_init();
   
-  initWiFi();
+  // Connecting to Wifi
+  wifiIsConnected = initWiFi(true);
 
   screenLastOnFocus = 2;
   previousScreenLastOnFocus = 0;
-  lockScreenTimer = millis();
+
+  //Increment boot number and print it every reboot
+  ++bootCount;
+  Serial.println("Boot number: " + String(bootCount));
+  //Print the wakeup reason for ESP32
+  print_wakeup_reason();
+  #if USE_EXT0_WAKEUP
+  esp_sleep_enable_ext0_wakeup(WAKEUP_GPIO, 1);  //1 = High, 0 = Low
+  // Configure pullup/downs via RTCIO to tie wakeup pins to inactive level during deepsleep.
+  // EXT0 resides in the same power domain (RTC_PERIPH) as the RTC IO pullup/downs.
+  // No need to keep that power domain explicitly, unlike EXT1.
+  rtc_gpio_pullup_dis(WAKEUP_GPIO);
+  rtc_gpio_pulldown_en(WAKEUP_GPIO);
+  #else  // TIME WAKEUP
+  /* wake up every 10 seconds  */
+  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+  Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) +
+  " Seconds");
+  #endif
+
+  //Start the awake timer
+  runMillis = millis();
+
+  //Print sleep timer    
+  sleepMillis = millis()-sleepMillis;
+  int sleepSeconds = sleepMillis/1000;
+  int secsRemaining=sleepSeconds%3600;
+  int _sleepMinutes=secsRemaining/60;
+  int _sleepSeconds=secsRemaining%60;
+
+  char buf[21];
+  sprintf(buf,"Sleepntime %02d:%02d",_sleepMinutes,_sleepSeconds);
+  Serial.println(buf);
+
+  startScreen = true;
+  stopSplashScreenTimer = millis();
+  timeToSleepTimer = millis();
+  previousNode3Millis = millis(); 
 }
 
 void loop() { 
   enum SCREEN scr = NOSCREEN;
+
+  if (!startScreen)
+  { 
+    int MOTION_GPIOState = digitalRead(MOTION_GPIO); // Reading input from Button Pin.
+
+    if (MOTION_GPIOState == HIGH) // Checking if Input from button is HIGH (1/+5V)
+    { 
+      screenLastOnFocus = 2; // Weather screen 
+      timeToSleepTimer = millis();
+      Serial.println("MOTION_GPIOState"); 
+    } 
+  }
+  
+  stopSplashScreen();
+
+  // Prepare to put the unit in deep sleep mode  
+  prepToGoToSleep();  
 
   // Switch between the different screens
   switchBetweenScreens();
@@ -187,12 +267,8 @@ void loop() {
   // Check clicked button and send connected event
   buttonHandler();
 
-  // Auto-lock the screen of delay time elapsed
-  if (!splashScreenOn)
-  {
-    lockScreen(); 
-  }
-
+  // Connect or reconnect to Wifi
+  initWiFi(false);
   // GUI Handler
   lv_timer_handler();
   lv_tick_inc(100);
@@ -230,15 +306,21 @@ void switchBetweenScreens()
   }
 }
 
-void lockScreen(void)
+void stopSplashScreen(void)
 {  
-  unsigned long currentLockScreenMillis = millis();
-  if (currentLockScreenMillis - lockScreenTimer >= intervalLockScreen) {
-      screenOnFocus = 1;
-      _ui_screen_change(&ui_splash, LV_SCR_LOAD_ANIM_FADE_ON, 0, 1500, &ui_splash_screen_init);
-      lockScreenTimer = currentLockScreenMillis;
-      intervalLockScreen = delay5min*milisec;
-  } 
+  if (startScreen)
+  {  
+    unsigned long currentstopSplashScreenMillis = millis();
+    if (currentstopSplashScreenMillis - stopSplashScreenTimer >= intervalstopSplashScreen) {
+        screenOnFocus = 2;
+        stopSplashScreenTimer = currentstopSplashScreenMillis;
+        intervalstopSplashScreen = delay5min*milisec;
+        Serial.println("stopSplashScreen");
+        _ui_screen_change(&ui_ScreenWeather, LV_SCR_LOAD_ANIM_FADE_ON, 0, 1500, &ui_ScreenWeather_screen_init);
+        
+        startScreen = false;
+    } 
+  }
 }
 
 void buttonHandler(void)
@@ -246,7 +328,7 @@ void buttonHandler(void)
    // Check clicked button and send connected event
   if (_SWITCHSTATUS != last_SWITCHSTATUS)
   {
-    lockScreenTimer = millis();
+    // lockScreenTimer = millis();
 
     sw1 = ui_Switch1Node1->state == 3 ? "ON": sw1;
     sw1 = ui_Switch1Node1->state == 2 ? "OFF": sw1;
@@ -282,68 +364,63 @@ void buttonHandler(void)
 
 void weather_Data()
 {  
+  String temperature = "";
+  String pressure = "";
+  String MaxMinTemp = "";
+  String humidity = "";
+  String altitude = "";
   
+  String weathet_temperature = "";
+  String weathet_humidity = "";
+  String weathet_pressure = "";
+  String weathet_wind_speed = "";
+
+  String time_and_date = "";  
   unsigned long currentNode3Millis = millis();
-  if (currentNode3Millis - previousNode3Millis >= intervalNode3) 
-  {   
-    if(screenLastOnFocus == WEATHER)
+  
+  if (screenLastOnFocus == WEATHER)
+  {     
+    if(currentNode3Millis - previousNode3Millis >= intervalNode3) 
     {
-      String temperature = "";
-      String pressure = "";
-      String MaxMinTemp = "";
-      String humidity = "";
-      String altitude = "";
+      if (wifiIsConnected)
+      {        
+        temperature	= getSensorValue("sensor.temppressuresensor_bme280_temperature");
+        pressure 		= getSensorValue("sensor.temppressuresensor_bme280_pressure");
+        humidity 		= getSensorValue("sensor.temppressuresensor_bme280_humidity");
+        altitude 		= getSensorValue("sensor.temppressuresensor_bme280_pressure");
+
+        weathet_temperature = String(getSensorAttributeValue("weather.forecast_hem", "temperature").toFloat(), 1);
+        weathet_humidity= String(getSensorAttributeValue("weather.forecast_hem", "humidity").toFloat(), 1);
+        weathet_pressure = String(getSensorAttributeValue("weather.forecast_hem", "pressure").toFloat(), 1);
+        weathet_wind_speed = String(getSensorAttributeValue("weather.forecast_hem", "wind_speed").toFloat(), 1);         
+        time_and_date	= getSensorValue("sensor.time_date");
+        timebetweenSleeps = time_and_date.c_str(); 
+      }
+        
+      if (weathet_temperature != "" ||
+          weathet_humidity 	  != "" ||	
+          weathet_pressure 	  != "" || 	
+          weathet_wind_speed )
+      {
+        lv_label_set_text(ui_LbTempValue1, weathet_temperature.c_str());   
+        lv_label_set_text(ui_LbHumidityValue1, weathet_humidity.c_str()); 
+        lv_label_set_text(ui_LbPressureValue1, weathet_pressure.c_str()); 
+        lv_label_set_text(ui_LbWindspeedValue1, weathet_wind_speed.c_str()); 
+        lv_label_set_text(ui_LbTempValue2, temperature.c_str());   
+        lv_label_set_text(ui_LbHumidityValue2, humidity.c_str()); 
+        lv_label_set_text(ui_LbPressureValue2, pressure.c_str());  
+        lv_label_set_text(ui_LbTimeAndDate, time_and_date.c_str());   
+        intervalNode3 = 10000;		
+      }
+      else
+      {
+        intervalNode3 = 1000;
+        Serial.println("intervalNode3 = 10");
+        WiFi.reconnect();
+      } 
       
-      String weathet_temperature = "";
-      String weathet_humidity = "";
-      String weathet_pressure = "";
-      String weathet_wind_speed = "";
-
-      String time_and_date = "";
-
-      time_and_date	= getSensorValue("sensor.time_date");
-      Serial.print("time_and_date: "+time_and_date+" ");
-
-      temperature	= getSensorValue("sensor.temppressuresensor_bme280_temperature");
-      pressure 		= getSensorValue("sensor.temppressuresensor_bme280_pressure");
-      humidity 		= getSensorValue("sensor.temppressuresensor_bme280_humidity");
-      altitude 		= getSensorValue("sensor.temppressuresensor_bme280_pressure");
-
-      weathet_temperature = String(getSensorAttributeValue("weather.forecast_hem", "temperature").toFloat(), 1);
-      weathet_humidity= String(getSensorAttributeValue("weather.forecast_hem", "humidity").toFloat(), 1);
-      weathet_pressure = String(getSensorAttributeValue("weather.forecast_hem", "pressure").toFloat(), 1);
-      weathet_wind_speed = String(getSensorAttributeValue("weather.forecast_hem", "wind_speed").toFloat(), 1);
-
-      // Serial.print("weathet_temperature: "+weathet_temperature+" ");
-      // Serial.print("weathet_humidity: "+weathet_humidity+" ");
-      // Serial.print("weathet_pressure: "+weathet_pressure+" ");
-      // Serial.print("weathet_wind_speed: "+weathet_wind_speed+" ");
-
-      // Serial.print("Temperature: ");
-      // Serial.print(temperature+" ");  
-      // Serial.print("  ");
-      // Serial.print("Pressure: ");
-      // Serial.print(pressure+" ");  
-      // Serial.print("  ");
-      // Serial.print("Humidity: ");
-      // Serial.println(humidity+" "); 
-      // Serial.print("  ");
-      // Serial.print("Altitude: ");
-      // Serial.println(altitude+" "); 
-      
-      lv_label_set_text(ui_LbTempValue1, weathet_temperature.c_str());   
-      lv_label_set_text(ui_LbHumidityValue1, weathet_humidity.c_str()); 
-      lv_label_set_text(ui_LbPressureValue1, weathet_pressure.c_str()); 
-      lv_label_set_text(ui_LbWindspeedValue1, weathet_wind_speed.c_str()); 
-
-      lv_label_set_text(ui_LbTempValue2, temperature.c_str());   
-      lv_label_set_text(ui_LbHumidityValue2, humidity.c_str()); 
-      lv_label_set_text(ui_LbPressureValue2, pressure.c_str());   
-      
-      lv_label_set_text(ui_LbTimeAndDate, time_and_date.c_str());    
-    }  
-    previousNode3Millis = currentNode3Millis;
-    intervalNode3 = 10000;
+      previousNode3Millis = currentNode3Millis;	 
+    }     
   } 
 }
 
@@ -412,5 +489,46 @@ void serialEvent() {
     if (inChar == '\n') {
       stringComplete = true;
     }
+  }
+}
+
+void prepToGoToSleep(void)
+{  
+  unsigned long currentAwakeMillis = millis();
+  if (currentAwakeMillis - timeToSleepTimer >= intervalDeepSleep) {
+      timeToSleepTimer = currentAwakeMillis;
+
+      //Print the awake timer
+      runMillis = millis()-runMillis;
+      int runSeconds = runMillis/1000;
+      int secsRemaining=runSeconds%3600;
+      int _runMinutes=secsRemaining/60;
+      int _runSeconds=secsRemaining%60;
+      char buf[21];
+      sprintf(buf,"Runtime %02d:%02d",_runMinutes, _runSeconds);
+      Serial.println(buf);
+      
+      // Start sleep timer
+      sleepMillis = millis();
+
+      Serial.println("Going to sleep now: "+timebetweenSleeps);
+      Serial.flush(); 
+      esp_deep_sleep_start();
+  } 
+}
+
+void print_wakeup_reason(){
+  esp_sleep_wakeup_cause_t wakeup_reason;
+
+  wakeup_reason = esp_sleep_get_wakeup_cause();
+
+  switch(wakeup_reason)
+  {
+    case ESP_SLEEP_WAKEUP_EXT0 : Serial.println("Wakeup caused by external signal using RTC_IO"); break;
+    case ESP_SLEEP_WAKEUP_EXT1 : Serial.println("Wakeup caused by external signal using RTC_CNTL"); break;
+    case ESP_SLEEP_WAKEUP_TIMER : Serial.println("Wakeup caused by timer"); break;
+    case ESP_SLEEP_WAKEUP_TOUCHPAD : Serial.println("Wakeup caused by touchpad"); break;
+    case ESP_SLEEP_WAKEUP_ULP : Serial.println("Wakeup caused by ULP program"); break;
+    default : Serial.printf("Wakeup was not caused by deep sleep: %d\n",wakeup_reason); break;
   }
 }
