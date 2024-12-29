@@ -249,7 +249,7 @@ void loop() {
     { 
       screenLastOnFocus = 2; // Weather screen 
       timeToSleepTimer = millis();
-      Serial.println("MOTION_GPIOState"); 
+      //Serial.println("MOTION_GPIOState"); 
     } 
   }
   
@@ -461,16 +461,19 @@ void httpSendButtonStatus(char __Switchstatus, char _last_Switchstatus)
           sensorData = httpGETRequest(haLED2);
           break;  
         case 33:
-          sensorData = httpGETRequest(haLED3);
+          sensorData = "switch3 on";//httpGETRequest(haLED4);
+          setLightstripBrightness(1);
           break;
         case 30:
-          sensorData = httpGETRequest(haLED3);
+          sensorData = "switch3 off";//httpGETRequest(haLED4);
+          setLightstripBrightness(1);
           break;  
         case 44:
-          sensorData = httpGETRequest(haLED4);
-          break;
+          sensorData = "switch4 on";//httpGETRequest(haLED4);
+          setLightstripBrightness(255);
         case 40:
-          sensorData = httpGETRequest(haLED4);
+          sensorData = "switch4 off";//httpGETRequest(haLED4);
+          setLightstripBrightness(255);
           break;  
         default:
           break;

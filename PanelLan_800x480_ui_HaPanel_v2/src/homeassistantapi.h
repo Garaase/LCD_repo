@@ -69,3 +69,16 @@ String getSensorAttributeValue(String entity, String attribute)
     Serial.println("  - " + entity + ".Attributes[" + attribute + "]: " + attr);
     return "";
 }
+
+
+void setLightstripBrightness(int brghtnssValue)
+{
+    String api_url = ha_server + "/api/webhook/lightstripparam";
+    http.begin(api_url);
+    http.addHeader("Content-Type", "application/json");
+    int code = http.POST("{\"brightness\": "+String(brghtnssValue)+", \"color_temp\":500}");
+    if (code != HTTP_CODE_OK)
+    {
+        Serial.println("Error '" + String(code) + "' connecting to HA API for: " + api_url);
+    }
+}
