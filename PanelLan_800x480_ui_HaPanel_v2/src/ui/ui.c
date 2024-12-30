@@ -158,7 +158,7 @@ void ui_event_Switch1Node1(lv_event_t * e)
     lv_obj_t * obj = lv_event_get_target(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
         LV_UNUSED(obj);
-        _SWITCHSTATUS = lv_obj_has_state(obj, LV_STATE_CHECKED) ? 11 : 10;
+        PRESSEDSWITCH = lv_obj_has_state(obj, LV_STATE_CHECKED) ? S1N1_ON : S1N1_OFF;
     }
 }
 void ui_event_Switch2Node1(lv_event_t * e)
@@ -167,7 +167,7 @@ void ui_event_Switch2Node1(lv_event_t * e)
     lv_obj_t * obj = lv_event_get_target(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
         LV_UNUSED(obj);
-        _SWITCHSTATUS = lv_obj_has_state(obj, LV_STATE_CHECKED) ? 22 : 20;
+        PRESSEDSWITCH = lv_obj_has_state(obj, LV_STATE_CHECKED) ? S2N1_ON : S2N1_OFF;
     }
 }
 void ui_event_Switch3Node1(lv_event_t * e)
@@ -176,7 +176,7 @@ void ui_event_Switch3Node1(lv_event_t * e)
     lv_obj_t * obj = lv_event_get_target(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
         LV_UNUSED(obj);
-        _SWITCHSTATUS = lv_obj_has_state(obj, LV_STATE_CHECKED) ? 33 : 30;
+        PRESSEDSWITCH = lv_obj_has_state(obj, LV_STATE_CHECKED) ? S3N1_ON : S3N1_OFF;
     }
 }
 void ui_event_Switch4Node1(lv_event_t * e)
@@ -185,7 +185,7 @@ void ui_event_Switch4Node1(lv_event_t * e)
     lv_obj_t * obj = lv_event_get_target(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
         LV_UNUSED(obj);
-        _SWITCHSTATUS = lv_obj_has_state(obj, LV_STATE_CHECKED) ? 44 : 40;
+        PRESSEDSWITCH = lv_obj_has_state(obj, LV_STATE_CHECKED) ? S4N1_ON : S4N1_OFF;
     }
 }
 
@@ -196,7 +196,7 @@ void ui_event_Switch1Node2(lv_event_t * e)
     if(code == LV_EVENT_VALUE_CHANGED) {
         LV_UNUSED(obj);
         //LV_LOG_USER("State: %s\n", lv_obj_has_state(obj, LV_STATE_CHECKED) ? "On" : "Off");
-        _SWITCHSTATUS = lv_obj_has_state(obj, LV_STATE_CHECKED) ? 11 : 10;
+        PRESSEDSWITCH = lv_obj_has_state(obj, LV_STATE_CHECKED) ? S1N2_ON : S1N2_OFF;
     }
 }
 void ui_event_Switch2Node2(lv_event_t * e)
@@ -205,7 +205,7 @@ void ui_event_Switch2Node2(lv_event_t * e)
     lv_obj_t * obj = lv_event_get_target(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
         LV_UNUSED(obj);
-        _SWITCHSTATUS = lv_obj_has_state(obj, LV_STATE_CHECKED) ? 22 : 20;
+        PRESSEDSWITCH = lv_obj_has_state(obj, LV_STATE_CHECKED) ? S2N2_ON : S2N2_OFF;
     }
 }
 void ui_event_Switch3Node2(lv_event_t * e)
@@ -214,7 +214,7 @@ void ui_event_Switch3Node2(lv_event_t * e)
     lv_obj_t * obj = lv_event_get_target(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
         LV_UNUSED(obj);
-        _SWITCHSTATUS = lv_obj_has_state(obj, LV_STATE_CHECKED) ? 33 : 30;
+        PRESSEDSWITCH = lv_obj_has_state(obj, LV_STATE_CHECKED) ? S3N2_ON : S3N2_OFF;
     }
 }
 void ui_event_Switch4Node2(lv_event_t * e)
@@ -223,7 +223,7 @@ void ui_event_Switch4Node2(lv_event_t * e)
     lv_obj_t * obj = lv_event_get_target(e);
     if(code == LV_EVENT_VALUE_CHANGED) {
         LV_UNUSED(obj);
-        _SWITCHSTATUS = lv_obj_has_state(obj, LV_STATE_CHECKED) ? 44 : 40;
+        PRESSEDSWITCH = lv_obj_has_state(obj, LV_STATE_CHECKED) ? S4N2_ON : S4N2_OFF;
     }
 }
 

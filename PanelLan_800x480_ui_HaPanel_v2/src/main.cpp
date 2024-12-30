@@ -39,7 +39,6 @@ char lastSW2num = 0;
 char lastSW3num = 0;
 char lastSW4num = 0;
 
-String sensorData;
 char previousScreenLastOnFocus;
 int milisec = 1000;
 int delay5min =60*5;                          //60s * 5 = 300s => 5min
@@ -61,7 +60,7 @@ int MOTION_GPIO  = GPIO_NUM_2;     // Only RTC IO are allowed - ESP32 Pin exampl
 
 String inputString = "";      // a String to hold incoming data
 bool stringComplete = false;  // whether the string is complete
-char last_SWITCHSTATUS = 0;
+
 
 enum SCREEN
 {
@@ -81,10 +80,7 @@ RTC_DATA_ATTR int bootCount = 0;
 RTC_DATA_ATTR String timebetweenSleeps = "";
 void print_wakeup_reason();
 void prepToGoToSleep(void);
-
-String httpGETRequest(const char* serverName);
-void buttonHandler(void);
-void httpSendButtonStatus(char __Switchstatus, char _last_Switchstatus);
+char httpSendButtonStatus(char __Switchstatus, char _last_Switchstatus);
 void lockScreen(void);
 void weather_Data();
 void switchBetweenScreens();
@@ -158,7 +154,7 @@ void calibrate() // function to calibrate ILI9341 TFT screen
 }
 
 void setup(void) {
-  char _SWITCHSTATUS = 0;
+  PRESSEDSWITCH = 0;
 
   pinMode(MOTION_GPIO, INPUT);  // Define BUTTON pin as Input.
 
@@ -265,7 +261,7 @@ void loop() {
   weather_Data();
 
   // Check clicked button and send connected event
-  buttonHandler();
+  lastPRESSEDSWITCH = httpSendButtonStatus(PRESSEDSWITCH, lastPRESSEDSWITCH);
 
   // Connect or reconnect to Wifi
   initWiFi(false);
@@ -321,45 +317,6 @@ void stopSplashScreen(void)
         startScreen = false;
     } 
   }
-}
-
-void buttonHandler(void)
-{
-   // Check clicked button and send connected event
-  if (_SWITCHSTATUS != last_SWITCHSTATUS)
-  {
-    // lockScreenTimer = millis();
-
-    sw1 = ui_Switch1Node1->state == 3 ? "ON": sw1;
-    sw1 = ui_Switch1Node1->state == 2 ? "OFF": sw1;
-    sw2 = ui_Switch2Node1->state == 3 ? "ON": sw2;
-    sw2 = ui_Switch2Node1->state == 2 ? "OFF": sw2;
-    sw3 = ui_Switch3Node1->state == 3 ? "ON": sw3;
-    sw3 = ui_Switch3Node1->state == 2 ? "OFF": sw3;
-    sw4 = ui_Switch4Node1->state == 3 ? "ON": sw4;
-    sw4 = ui_Switch4Node1->state == 2 ? "OFF": sw4;
-    
-    Serial.print("ui_Switch1Node1->state: ");
-    Serial.print(sw1);
-    Serial.print("    ui_Switch2Node1->state: ");
-    Serial.print(sw2);
-    Serial.print("    ui_Switch3Node1->state: ");
-    Serial.print(sw3);
-    Serial.print("    ui_Switch4Node1->state: ");
-    Serial.print(sw4);    
-    Serial.print("    _SWITCHSTATUS: ");
-    Serial.println(_SWITCHSTATUS, DEC);
-
-    httpSendButtonStatus(_SWITCHSTATUS, last_SWITCHSTATUS);
-
-    last_SWITCHSTATUS = _SWITCHSTATUS;
-
-    lastSW1num = sw1num;
-    lastSW2num = sw2num;
-    lastSW3num = sw3num;
-    lastSW4num = sw4num;    
-  }
-
 }
 
 void weather_Data()
@@ -424,61 +381,40 @@ void weather_Data()
   } 
 }
 
-String httpGETRequest(const char* serverName) 
-{
-  WiFiClient client;
-  HTTPClient http;    
-  
-  http.begin(client, serverName);  
-  // Send HTTP POST request
-  int httpResponseCode = http.GET();  
-  String payload = "--";   
-  if (httpResponseCode>0) 
-  {
-    payload = (http.getString()).c_str();
-  }
-  // Free resources
-  http.end();
-  return payload;
-}
-
-void httpSendButtonStatus(char __Switchstatus, char _last_Switchstatus)
+char httpSendButtonStatus(char __Switchstatus, char _last_Switchstatus)
 { 
-  if (_SWITCHSTATUS != _last_Switchstatus)
+  if (__Switchstatus != _last_Switchstatus)
     {    
-      switch (_SWITCHSTATUS)
+      switch (__Switchstatus)
       {
-        case 11:
-          sensorData = httpGETRequest(haLED1);
+        case S1N1_ON:
+          setWebhookSwitches("test-led1");
           break;
-        case 10:
-          sensorData = httpGETRequest(haLED1);
+        case S1N1_OFF:
+          setWebhookSwitches("test-led1");;
           break;  
-        case 22:
-          sensorData = httpGETRequest(haLED2);
+        case S2N1_ON:
+          setWebhookSwitches("test-led2");
           break;
-        case 20:
-          sensorData = httpGETRequest(haLED2);
+        case S2N1_OFF:
+          setWebhookSwitches("test-led2");
           break;  
-        case 33:
-          sensorData = "switch3 on";//httpGETRequest(haLED4);
-          setLightstripBrightness(1);
+        case S3N1_ON:
+          setWebhookLightstripValues(1);
           break;
-        case 30:
-          sensorData = "switch3 off";//httpGETRequest(haLED4);
-          setLightstripBrightness(1);
+        case S3N1_OFF:
+          setWebhookLightstripValues(1);
           break;  
-        case 44:
-          sensorData = "switch4 on";//httpGETRequest(haLED4);
-          setLightstripBrightness(255);
-        case 40:
-          sensorData = "switch4 off";//httpGETRequest(haLED4);
-          setLightstripBrightness(255);
+        case S4N1_ON:
+          setWebhookLightstripValues(255);
+        case S4N1_OFF:
+          setWebhookLightstripValues(255);
           break;  
         default:
           break;
       }
     }
+    return __Switchstatus;
 }
 
 void serialEvent() {
