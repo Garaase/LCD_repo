@@ -243,9 +243,9 @@ void ui_event_SwRGBLamp1ColorAndBrightness(lv_event_t * e)
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        //startColorPickerScreen = true;
         _ui_screen_change(&ui_ScreenColorPicker, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, &ui_ScreenColorPicker_screen_init);
         screenLastOnFocus = SCREENCOLORPICKER;
+        PRESSEDSWITCH = SWRGBLAMP1COLORBRI;
     }
 }
 void ui_event_SwRGBLamp2ColorAndBrightness(lv_event_t * e)
@@ -255,6 +255,7 @@ void ui_event_SwRGBLamp2ColorAndBrightness(lv_event_t * e)
     if(event_code == LV_EVENT_CLICKED) {
         _ui_screen_change(&ui_ScreenColorPicker, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, &ui_ScreenColorPicker_screen_init);
         screenLastOnFocus = SCREENCOLORPICKER;
+        PRESSEDSWITCH = SWRGBLAMP2COLORBRI;
     }
 }
 void ui_event_SwRGBLamp3ColorAndBrightness(lv_event_t * e)
@@ -264,6 +265,7 @@ void ui_event_SwRGBLamp3ColorAndBrightness(lv_event_t * e)
     if(event_code == LV_EVENT_CLICKED) {
         _ui_screen_change(&ui_ScreenColorPicker, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, &ui_ScreenColorPicker_screen_init);
         screenLastOnFocus = SCREENCOLORPICKER;
+        PRESSEDSWITCH = SWRGBLAMP3COLORBRI;
     }
 }
 void ui_event_SwLightStripBrightness(lv_event_t * e)

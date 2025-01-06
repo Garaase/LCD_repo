@@ -378,55 +378,40 @@ void weather_Data()
 
 void rgbLampControl(void)
 { 
+
+  // if (cPickRBGBrightnessChanged || cPickRBGColorChanged)
+  // {
+  //   Serial.print("cPickRBGBrightnessChanged; ");
+  //   Serial.print(cPickRBGBrightnessChanged);
+  //   Serial.print(", cPickRBGColorChanged: ");
+  //   Serial.print(cPickRBGColorChanged);
+  //   Serial.print(", PRESSEDSWITCH: ");
+  //   Serial.println(PRESSEDSWITCH, DEC);
+  // }
+
   if (cPickRBGBrightnessChanged)
   {
-    Serial.print("cPickerRGBValue : ");
-    Serial.print("(");
-    Serial.print(cPickerRGBValue.ch.red);
-    Serial.print(",");
-    Serial.print(cPickerRGBValue.ch.green);
-    Serial.print(",");
-    Serial.print(cPickerRGBValue.ch.blue);
-    Serial.print(")");
-    Serial.print(" Brightness: ");
-    Serial.println(rgbLampBrightness);
-
+    // Change rgblamp1 brightness
     cPickRBGBrightnessChanged = false;
-    setWebhookrgbLampValues(1, rgbLampBrightness, cPickerRGBValue);
+    setWebhookrgbLampValues(1, PRESSEDSWITCH, rgbLampBrightness, cPickerRGBValue);
   }
   if (cPickRBGColorChanged)
   {
-    Serial.print("cPickerRGBValue : ");
-    Serial.print("(");
-    Serial.print(cPickerRGBValue.ch.red);
-    Serial.print(",");
-    Serial.print(cPickerRGBValue.ch.green);
-    Serial.print(",");
-    Serial.print(cPickerRGBValue.ch.blue);
-    Serial.print(")");
-    Serial.print(" Brightness: ");
-    Serial.println(rgbLampBrightness);
-
+    // Change rgblamp1 color
     cPickRBGColorChanged = false;
-    setWebhookrgbLampValues(2, rgbLampBrightness, cPickerRGBValue);
+    setWebhookrgbLampValues(2, PRESSEDSWITCH, rgbLampBrightness, cPickerRGBValue);
   }
   if (lightstripBrightnessChanged)
-  {
-    Serial.print("lightstripBrightness: ");
-    Serial.print(lightstripBrightness);
-    Serial.print(",  ");
-    Serial.println(lightstripColorTemp);    
-    setWebhookLightstripValues(1, lightstripBrightness, lightstripColorTemp);
+  {  
+    // Change ligh strip brightness
     lightstripBrightnessChanged = false;
+    setWebhookLightstripValues(1, lightstripBrightness, lightstripColorTemp);
   }
   if (lightstripColorTempChanged)
-  {
-    Serial.print("lightstripBrightness: ");
-    Serial.print(lightstripBrightness);
-    Serial.print(",  ");
-    Serial.println(lightstripColorTemp);    
-    setWebhookLightstripValues(2, lightstripBrightness, lightstripColorTemp);
+  {  
+    // Change ligh strip color temp 
     lightstripColorTempChanged = false;
+    setWebhookLightstripValues(2, lightstripBrightness, lightstripColorTemp);
   }
 }
 

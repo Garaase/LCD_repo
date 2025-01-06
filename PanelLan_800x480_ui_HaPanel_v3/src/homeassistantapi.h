@@ -130,13 +130,45 @@ void setWebhookLightstripValues(char valueType, int brghtnssValue, int colortemp
     }
 }
 
-void setWebhookrbgLampValues(char valueType, int brghtnssValue, lv_color32_t col)
+void setWebhookrgbLampValues(char valueType, char pressedlampswitch, int brghtnssValue, lv_color32_t col)
 {
     int code =  0;
     String api_url;
+    String webhook_id = "";
+
+    if (pressedlampswitch == SWRGBLAMP1COLORBRI && valueType == 1)
+    {
+        webhook_id = "rgblamp1brightness";
+    }
+    else if (pressedlampswitch == SWRGBLAMP1COLORBRI && valueType == 2)
+    {
+        webhook_id = "rgblamp1color";
+    }
+    else if (pressedlampswitch == SWRGBLAMP2COLORBRI && valueType == 1)
+    {
+        webhook_id = "rgblamp2brightness";
+    }
+    else if (pressedlampswitch == SWRGBLAMP2COLORBRI && valueType == 2)
+    {
+        webhook_id = "rgblamp2color";
+    }    
+    else if (pressedlampswitch == SWRGBLAMP3COLORBRI && valueType == 1)
+    {
+        webhook_id = "rgblamp3brightness";
+    }
+    else if (pressedlampswitch == SWRGBLAMP3COLORBRI && valueType == 2)
+    {
+        webhook_id = "rgblamp3color";
+    }
+    else
+    {
+        // Do nothing
+    }
+    
+
     if (valueType == 1)
     {
-        api_url = ha_server + "/api/webhook/rgblamp1brightness";
+        api_url = ha_server + "/api/webhook/" + webhook_id;
         http.begin(api_url);
         http.addHeader("Content-Type", "application/json");
         http.POST("{\"brightness\": "+String(brghtnssValue)+"}");
@@ -144,7 +176,7 @@ void setWebhookrbgLampValues(char valueType, int brghtnssValue, lv_color32_t col
     }
     else if (valueType == 2)
     {
-        api_url = ha_server + "/api/webhook/rgblamp1color";
+        api_url = ha_server + "/api/webhook/" + webhook_id;
         http.begin(api_url);
         http.addHeader("Content-Type", "application/json");
         http.POST("{\"rgb_color\":["+String(col.ch.red)+","+String(col.ch.green)+","+String(col.ch.blue)+"]}");
@@ -154,6 +186,13 @@ void setWebhookrbgLampValues(char valueType, int brghtnssValue, lv_color32_t col
     {
         // Do nothing
     } 
+
+    Serial.print("pressedlampswitch; ");
+    Serial.print(pressedlampswitch, DEC);
+    Serial.print(", valueType: ");
+    Serial.print(valueType, DEC);
+    Serial.print(", webhook_id: ");
+    Serial.println(webhook_id);
 }
 
 void setWebhookSwitches(const char* _switch)
