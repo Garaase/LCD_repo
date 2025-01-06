@@ -8,6 +8,7 @@ char lastPRESSEDSWITCH = 0;
 char arcInit;
 
 enum SWITCHSTATUS;
+enum SWITCHNUMBER;
 enum SCREEN;
 uint32_t lockScreenTimer = 0;
 bool splashScreenOn = false;

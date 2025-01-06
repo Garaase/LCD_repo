@@ -67,7 +67,6 @@ void switchBetweenScreens();
 void stopSplashScreen(void);
 void rgbLampControl(void);
 void changeScreenControlButtonStatusText(bool init, int sw);
-void toggleLamps(void); 
 
 /******************************************************************/
 #define W  800
@@ -279,8 +278,10 @@ void switchBetweenScreens()
         Serial.println("WEATHER screen"); 
         break;
       case SCREENLIGHTCONTROL:
-        changeScreenControlButtonStatusText(1,1);
-        changeScreenControlButtonStatusText(1,2);
+        changeScreenControlButtonStatusText(1,SWLIGHTSTRIP);
+        changeScreenControlButtonStatusText(1,SWRGBLAMP1);
+        changeScreenControlButtonStatusText(1,SWRGBLAMP2);
+        changeScreenControlButtonStatusText(1,SWRGBLAMP3);
         Serial.println("SCREENLIGHTCONTROL screen");     
         break;   
       case SCREENCOLORPICKER:
@@ -307,9 +308,7 @@ void stopSplashScreen(void)
         stopSplashScreenTimer = currentstopSplashScreenMillis;
         intervalstopSplashScreen = delay5min*milisec;
         Serial.println("stopSplashScreen");
-        _ui_screen_change(&ui_ScreenWeather, LV_SCR_LOAD_ANIM_FADE_ON, 0, 1500, &ui_ScreenWeather_screen_init);
-        // changeScreenControlButtonStatusText(1);    
-        // changeScreenControlButtonStatusText(2);    
+        _ui_screen_change(&ui_ScreenWeather, LV_SCR_LOAD_ANIM_FADE_ON, 0, 1500, &ui_ScreenWeather_screen_init);  
         startScreen = false;
     } 
   }
@@ -393,7 +392,7 @@ void rgbLampControl(void)
     Serial.println(rgbLampBrightness);
 
     cPickRBGBrightnessChanged = false;
-    setWebhookrbgLampValues(1, rgbLampBrightness, cPickerRGBValue);
+    setWebhookrgbLampValues(1, rgbLampBrightness, cPickerRGBValue);
   }
   if (cPickRBGColorChanged)
   {
@@ -409,7 +408,7 @@ void rgbLampControl(void)
     Serial.println(rgbLampBrightness);
 
     cPickRBGColorChanged = false;
-    setWebhookrbgLampValues(2, rgbLampBrightness, cPickerRGBValue);
+    setWebhookrgbLampValues(2, rgbLampBrightness, cPickerRGBValue);
   }
   if (lightstripBrightnessChanged)
   {
@@ -434,7 +433,7 @@ void rgbLampControl(void)
 void changeScreenControlButtonStatusText(bool init, int sw)
 {
   const char* swstatus = "";
-  if (sw == 1)
+  if (sw == SWRGBLAMP1)
   {
     String rgblamp1Status = getSensorValue("light.rbglamp1");
     Serial.print(">> rgblamp1Status: ");
@@ -450,7 +449,39 @@ void changeScreenControlButtonStatusText(bool init, int sw)
     
     lv_label_set_text(ui_LbSwRGBLamp1StatusText, swstatus);
   }
-  else if (sw == 2)
+  else if (sw == SWRGBLAMP2)
+  {
+    String rgblamp2Status = getSensorValue("light.rgblamp2");
+    Serial.print(">> rgblamp2Status: ");
+    Serial.println(rgblamp2Status);
+    if (init == 1)
+    {
+      swstatus = rgblamp2Status == "on"? "ON" : "OFF";
+    }
+    else
+    {
+      swstatus = rgblamp2Status == "on"? "OFF" : "ON";
+    }
+    
+    lv_label_set_text(ui_LbSwRGBLamp2StatusText, swstatus);
+  }
+  else if (sw == SWRGBLAMP3)
+  {
+    String rgblamp3Status = getSensorValue("light.rgblamp3");
+    Serial.print(">> rgblamp3Status: ");
+    Serial.println(rgblamp3Status);
+    if (init == 1)
+    {
+      swstatus = rgblamp3Status == "on"? "ON" : "OFF";
+    }
+    else
+    {
+      swstatus = rgblamp3Status == "on"? "OFF" : "ON";
+    }
+    
+    lv_label_set_text(ui_LbSwRGBLamp3StatusText, swstatus);
+  }
+  else if (sw == SWLIGHTSTRIP)
   {
     String lightstripStatus = getSensorValue("light.co_smart_lightstrip");
     Serial.print(">> lightstripStatus");
@@ -466,28 +497,8 @@ void changeScreenControlButtonStatusText(bool init, int sw)
     
     lv_label_set_text(ui_LbSwLightStripStatusText, swstatus);
   }
-  
-  
-
 }
 
-// void toggleLamps(void)
-// {
-//   if (SwitchLightStripOnOff != last_SwitchLightStripOnOff)
-//   {
-//     setWebhookSwitches("lightstriponoff");
-//     changeScreenControlButtonStatusText(2);
-//     ~SwitchLightStripOnOff;
-//     last_SwitchLightStripOnOff = SwitchLightStripOnOff;
-//   }
-//   if (SwitchRGBLamp1OnOff != last_SwitchRGBLamp1OnOff)
-//   {
-//     setWebhookSwitches("rgblamp1onoff");
-//     changeScreenControlButtonStatusText(1);
-//     ~SwitchRGBLamp1OnOff;
-//     last_SwitchRGBLamp1OnOff = SwitchRGBLamp1OnOff;
-//   }  
-// }
 char httpSendButtonStatus(char __Switchstatus, char _last_Switchstatus)
 { 
   if (__Switchstatus != _last_Switchstatus)
@@ -497,24 +508,30 @@ char httpSendButtonStatus(char __Switchstatus, char _last_Switchstatus)
         case SWLIGHTSTRIPON:
         case SWLIGHTSTRIPOFF:
           setWebhookSwitches("lightstriponoff");
-          changeScreenControlButtonStatusText(0,2);
+          changeScreenControlButtonStatusText(0,SWLIGHTSTRIP);
           setWebhookSwitches("lightstriponoff");
-          changeScreenControlButtonStatusText(0,2);
+          changeScreenControlButtonStatusText(0,SWLIGHTSTRIP);
           break;  
         case SWRGBLAMP1ON:
         case SWRGBLAMP1OFF:
-          setWebhookSwitches("rbglamp1onoff");
-          changeScreenControlButtonStatusText(0,1);
-          setWebhookSwitches("rbglamp1onoff");
-          changeScreenControlButtonStatusText(0,1);
+          setWebhookSwitches("rgblamp1onoff");
+          changeScreenControlButtonStatusText(0,SWRGBLAMP1);
+          setWebhookSwitches("rgblamp1onoff");
+          changeScreenControlButtonStatusText(0,SWRGBLAMP1);
           break;  
         case SWRGBLAMP2ON:
-          break;
         case SWRGBLAMP2OFF:
+          setWebhookSwitches("rgblamp2onoff");
+          changeScreenControlButtonStatusText(0,SWRGBLAMP2);
+          setWebhookSwitches("rgblamp2onoff");
+          changeScreenControlButtonStatusText(0,SWRGBLAMP2);
           break;  
         case SWRGBLAMP3ON:
-          break; 
         case SWRGBLAMP3OFF:
+          setWebhookSwitches("rgblamp3onoff");
+          changeScreenControlButtonStatusText(0,SWRGBLAMP3);
+          setWebhookSwitches("rgblamp3onoff");
+          changeScreenControlButtonStatusText(0,SWRGBLAMP3);
           break;  
         default:
           break;
